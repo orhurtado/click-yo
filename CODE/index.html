@@ -1,0 +1,1299 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OHM's class - Estudiantes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>Ω</text></svg>"
+    />
+  </head>
+  <body class="bg-slate-50">
+    <div
+      id="notificacion-logro"
+      class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden animate-bounce"
+    >
+      <div
+        class="bg-white border-2 border-blue-500 shadow-2xl rounded-2xl px-6 py-3 flex items-center gap-3"
+      >
+        <span id="logro-emoji" class="text-3xl"></span>
+        <div>
+          <p class="text-[10px] font-black uppercase text-blue-500">Sistema</p>
+          <p id="logro-texto" class="font-bold text-slate-700"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="app" class="max-w-md mx-auto p-4 min-h-screen flex flex-col">
+      <header class="py-4 text-center border-b mb-4">
+        <h1 class="text-4xl font-bold text-blue-700">Click-YO</h1>
+
+        <div
+          id="status-bar"
+          class="text-[10px] font-bold uppercase text-slate-400 mt-1 tracking-widest"
+        >
+          ---
+        </div>
+      </header>
+
+      <div
+        id="section-login"
+        class="mt-20 flex-1 flex flex-col justify-center items-center"
+      >
+        <div
+          class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 w-full text-center"
+        >
+          <button
+            onclick="login()"
+            class="w-full bg-white border border-slate-300 flex items-center justify-center gap-3 py-3 rounded-xl shadow-sm"
+          >
+            <span class="font-semibold text-slate-700">Entrar con Google</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="section-registro"
+        class="hidden bg-white p-6 rounded-2xl shadow-lg"
+      >
+        <h2 class="font-bold mb-4 text-blue-800">Registro de Alumno</h2>
+        <div class="space-y-3">
+          <input
+            type="text"
+            id="reg-nombre"
+            placeholder="Nombre"
+            class="w-full border p-3 rounded-xl"
+          />
+          <input
+            type="text"
+            id="reg-apellido"
+            placeholder="Apellido"
+            class="w-full border p-3 rounded-xl"
+          />
+          <select
+            id="reg-horario"
+            onchange="
+              actualizarListaEquipos();
+              escucharClasesHorario(this.value);
+            "
+            class="w-full border p-3 rounded-xl bg-white"
+          >
+            <option value="" selected>-- Elige Horario --</option>
+            <option value="SA">SA</option>
+            <option value="A">A</option>
+            <option value="SB">SB</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+          <div class="bg-slate-100 rounded-xl p-4 mt-4">
+            <div class="mb-2">
+              <h2 class="text-sm font-bold">Clases disponibles</h2>
+              <p class="text-[10px] text-slate-500 mt-1">
+                🟢 Clases con inscripción abierta | 🟣 Clases donde ya estás
+                inscrito
+              </p>
+            </div>
+            <div id="lista-clases-horario" class="flex flex-col gap-2"></div>
+          </div>
+          <select
+            id="reg-equipo"
+            class="w-full border p-3 rounded-xl bg-white"
+            disabled
+          >
+            <option value="">-- Primero selecciona una clase --</option>
+          </select>
+
+          <!-- BOTÓN GLOBAL DE REGISTRO -->
+          <button
+            onclick="registrarseClase()"
+            class="w-full bg-green-600 text-white py-3 rounded-xl font-bold mt-4 hover:bg-green-700 transition-colors"
+          >
+            📝 Registrarme en esta clase
+          </button>
+        </div>
+      </div>
+
+      <div id="section-alumno" class="hidden text-center">
+        <h2
+          id="alumno-saludo"
+          class="text-xl font-bold mb-1 text-slate-700"
+        ></h2>
+        <p
+          id="alumno-equipo"
+          class="text-[10px] font-black text-blue-500 uppercase mb-6"
+        ></p>
+
+        <div class="bg-blue-50 rounded-lg p-2 mb-4 text-center">
+          <p class="text-[10px] text-blue-600 font-bold uppercase">
+            Clase activa
+          </p>
+          <p id="clase-activa-nombre" class="text-sm font-bold text-blue-800">
+            ---
+          </p>
+        </div>
+        <div class="flex justify-center mb-4">
+          <button
+            id="btn-salir-clase"
+            onclick="salirDeClase()"
+            class="bg-red-100 text-red-600 px-4 py-2 rounded-full text-[10px] font-bold uppercase hover:bg-red-200 transition-colors"
+          >
+            🚪 Salir de esta clase
+          </button>
+        </div>
+
+        <div
+          id="panel-votacion"
+          class="hidden bg-orange-50 p-5 rounded-2xl border-2 border-orange-200 mb-8"
+        >
+          <h3 class="text-orange-700 font-black text-xs uppercase mb-1">
+            Evaluación de Pares
+          </h3>
+          <p class="text-orange-900 font-bold mb-4">
+            Evaluando a:
+            <span id="txt-equipo-expo" class="underline text-orange-500"
+              >---</span
+            >
+          </p>
+          <div id="formulario-rubrica" class="space-y-3 text-left"></div>
+          <button
+            id="btn-enviar-voto"
+            onclick="enviarVoto()"
+            class="w-full bg-orange-600 text-white py-4 rounded-xl font-black mt-6 uppercase"
+          >
+            Enviar Voto
+          </button>
+          <div
+            id="voto-confirmado"
+            class="hidden py-8 text-center text-green-700 font-black text-lg italic"
+          >
+            ✅ Voto Registrado
+          </div>
+        </div>
+
+        <div class="grid grid-cols-5 gap-2 mb-6">
+          <div class="bg-white p-2 rounded-xl shadow-sm border">
+            <span class="block text-lg">🍋</span
+            ><span id="rank-limon" class="font-black text-slate-700">0</span>
+          </div>
+          <div class="bg-white p-2 rounded-xl shadow-sm border">
+            <span class="block text-lg">🥉</span
+            ><span id="rank-bronce" class="font-black text-slate-700">0</span>
+          </div>
+          <div class="bg-white p-2 rounded-xl shadow-sm border">
+            <span class="block text-lg">🥈</span
+            ><span id="rank-plata" class="font-black text-slate-700">0</span>
+          </div>
+          <div class="bg-white p-2 rounded-xl shadow-sm border">
+            <span class="block text-lg">🥇</span
+            ><span id="rank-oro" class="font-black text-slate-700">0</span>
+          </div>
+          <div class="bg-white p-2 rounded-xl shadow-sm border">
+            <span class="block text-lg">💎</span
+            ><span id="rank-diamante" class="font-black text-slate-700">0</span>
+          </div>
+        </div>
+
+        <div
+          id="podio-container"
+          class="bg-blue-900 rounded-2xl p-4 mb-8 shadow-lg"
+        >
+          <h3
+            class="text-white text-[10px] font-black uppercase tracking-widest mb-3 opacity-80 italic"
+          >
+            Panel de aportes destacados
+          </h3>
+          <table class="w-full text-white text-xs">
+            <thead>
+              <tr class="border-b border-blue-800 opacity-60">
+                <th class="text-left pb-2 font-medium">Nombre</th>
+                <th class="pb-2">🥈</th>
+                <th class="pb-2">🥇</th>
+                <th class="pb-2">💎</th>
+              </tr>
+            </thead>
+            <tbody id="podio-body"></tbody>
+          </table>
+        </div>
+
+        <div id="container-accion" class="hidden">
+          <div
+            id="msg-cerrado"
+            class="hidden py-10 bg-slate-200 text-slate-500 rounded-2xl font-bold mb-4 uppercase text-xs"
+          >
+            Participación Cerrada
+          </div>
+          <button
+            id="btn-yo"
+            onclick="entrarEnCola()"
+            class="w-40 h-40 bg-blue-600 text-white rounded-full text-4xl font-black shadow-2xl active:scale-95 mx-auto block"
+          >
+            ¡YO!
+          </button>
+        </div>
+
+        <div
+          id="status-cola"
+          class="hidden bg-yellow-50 p-8 rounded-3xl border-2 border-yellow-200 mt-4"
+        >
+          <p
+            class="text-yellow-700 text-[10px] font-black uppercase mb-1 italic"
+          >
+            Lugar en fila:
+          </p>
+          <span
+            id="pos-numero"
+            class="text-7xl font-black text-yellow-600 block"
+            >--</span
+          >
+        </div>
+
+        <footer class="mt-8 pb-4 border-t border-slate-200 pt-4 text-center">
+        <p
+          class="text-[10px] text-slate-400 font-medium tracking-widest uppercase"
+        >        
+          'CLICK-YO' BY
+          <span class="font-bold text-slate-500">OHM</span>
+          <a
+            href="https://opensource.org/license/mit"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-blue-900 transition-colors"
+          >
+            (MIT License)
+          </a>
+          2026
+          <br />
+          V.3.0 Rev.0
+        </p>
+      </footer>
+      </div>
+    </div>
+
+    <!-- **************************************
+                           SCRIPTS    
+           ************************************** -->
+
+    <script type="module">
+      window.claseActiva = null;
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        signInWithPopup,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        getDocs,
+        updateDoc,
+        collection,
+        query,
+        where,
+        orderBy,
+        onSnapshot,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: "",
+        measurementId: "",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const provider = new GoogleAuthProvider();
+
+      const RUBRICA = [
+        {
+          id: "dominio",
+          label:
+            "QUÉ TANTO DOMINIO TENIAN DEL TEMA? (1:NINGUNO .. 5:TOTALMENTE)",
+        },
+        {
+          id: "org",
+          label:
+            "QUÉ TAN BIEN ORGANIZARON LA EXPOSICION? (1:DEFICIENTE .. 5:EXCELENTE)",
+        },
+        {
+          id: "calidad",
+          label: "QUÉ TAN BIEN RESPONDIERON LAS PREGUNTAS? (1:MAL .. 5:BIEN)",
+        },
+        {
+          id: "comunicacion",
+          label: "QUÉ TAN BIEN ENTENDISTE EL TEMA? (1:NADA .. 5:TOTALMENTE)",
+        },
+        {
+          id: "tiempo",
+          label:
+            "SÍ UN EJERCICIO DE ESTE TEMA ENTRARA EN EL EXAMEN PODRIAS REALIZARLO? (1:NO..5:TOTALMENTE)",
+        },
+      ];
+
+      let userLocal,
+        perfilLocal,
+        medallasPrevias,
+        configActual = {};
+      let votosActuales = {};
+
+      // Función auxiliar para escapar HTML y evitar XSS
+      function escapeHtml(text) {
+        if (!text) return "";
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          document.getElementById("section-login").classList.remove("hidden");
+          return;
+        }
+
+        userLocal = user;
+
+        document.getElementById("section-login").classList.add("hidden");
+
+        const claseID = localStorage.getItem("claseSeleccionada");
+
+        if (!claseID) {
+          document
+            .getElementById("section-registro")
+            .classList.remove("hidden");
+          return;
+        }
+
+        const ref = doc(db, "clases", claseID, "estudiantes", user.uid);
+        const d = await getDoc(ref);
+
+        if (d.exists()) {
+          perfilLocal = d.data();
+
+          document.getElementById("section-alumno").classList.remove("hidden");
+
+          escucharPerfilYConfigAlumno();
+        } else {
+          document
+            .getElementById("section-registro")
+            .classList.remove("hidden");
+        }
+      });
+
+      window.login = () => signInWithPopup(auth, provider);
+
+      window.actualizarListaEquipos = async () => {
+        const horario = document.getElementById("reg-horario").value;
+        const claseSeleccionada = localStorage.getItem(
+          "claseSeleccionadaTemporal",
+        );
+        const sel = document.getElementById("reg-equipo");
+
+        console.log(
+          "actualizarListaEquipos - horario:",
+          horario,
+          "claseSeleccionada:",
+          claseSeleccionada,
+        );
+
+        // Si ya hay una clase seleccionada, no sobrescribir los grupos
+        if (
+          claseSeleccionada &&
+          sel &&
+          sel.options.length > 1 &&
+          sel.options[0].value === ""
+        ) {
+          // Ya hay grupos cargados, no hacer nada
+          console.log("Ya hay grupos cargados, no se sobrescribe");
+          return;
+        }
+
+        if (!horario) {
+          sel.innerHTML =
+            '<option value="">-- Elige un horario primero --</option>';
+          return;
+        }
+
+        // Si no hay clase seleccionada, mostrar mensaje
+        if (!claseSeleccionada) {
+          sel.innerHTML =
+            '<option value="">-- Selecciona una clase de la lista --</option>';
+          return;
+        }
+
+        // Si hay clase seleccionada, cargar sus grupos
+        try {
+          console.log("Cargando grupos para clase:", claseSeleccionada);
+          const gruposRef = collection(
+            db,
+            "clases",
+            claseSeleccionada,
+            "grupos",
+          );
+          const gruposSnapshot = await getDocs(gruposRef);
+
+          sel.innerHTML =
+            '<option value="">-- Selecciona tu equipo --</option>';
+
+          if (gruposSnapshot.empty) {
+            sel.innerHTML =
+              '<option value="">-- No hay grupos disponibles --</option>';
+          } else {
+            gruposSnapshot.forEach((doc) => {
+              const grupo = doc.data();
+              const opt = document.createElement("option");
+              opt.value = grupo.nombre;
+              opt.innerText = grupo.nombre;
+              sel.appendChild(opt);
+            });
+          }
+        } catch (error) {
+          console.error(
+            "Error al cargar grupos en actualizarListaEquipos:",
+            error,
+          );
+          sel.innerHTML =
+            '<option value="">-- Error al cargar grupos --</option>';
+        }
+      };
+
+      function escucharPerfilYConfigAlumno() {
+        const claseID = localStorage.getItem("claseSeleccionada");
+
+        if (!claseID) {
+          console.log("Alumno aún no tiene clase seleccionada");
+          return;
+        }
+
+        // ========== LISTENER DE LA CLASE (UNIFICADO) ==========
+        // Escucha los cambios en la clase (materia, profesor, colaAbierta, equipoExponiendo)
+        onSnapshot(doc(db, "clases", claseID), (snapClase) => {
+          if (!snapClase.exists()) return;
+
+          const clase = snapClase.data();
+
+          // Actualizar barra de estado superior
+          document.getElementById("status-bar").innerText =
+            `${clase.materia} | ${clase.profesorNombre} | ${clase.horario}`;
+
+          // Mostrar nombre de la clase activa
+          const claseActivaElement = document.getElementById(
+            "clase-activa-nombre",
+          );
+          if (claseActivaElement) {
+            claseActivaElement.innerText = `${clase.materia} (${clase.horario})`;
+          }
+
+          // Configurar estado de participación usando colaAbierta de la clase
+          configActual = {
+            abierta: clase.colaAbierta || false,
+            equipoExponiendo: clase.equipoExponiendo || null,
+          };
+
+          // Controlar visibilidad del botón YO y mensaje de participación cerrada
+          const btnYo = document.getElementById("btn-yo");
+          const msgCerrado = document.getElementById("msg-cerrado");
+
+          if (configActual.abierta) {
+            // Participación abierta: mostrar botón YO, ocultar mensaje
+            btnYo.classList.remove("hidden");
+            msgCerrado.classList.add("hidden");
+          } else {
+            // Participación cerrada: ocultar botón YO, mostrar mensaje
+            btnYo.classList.add("hidden");
+            msgCerrado.classList.remove("hidden");
+          }
+
+          // ========== PANEL DE VOTACIÓN ==========
+          const panel = document.getElementById("panel-votacion");
+
+          // Verificar si hay un equipo exponiendo y si el alumno no es de ese equipo
+          if (
+            configActual.equipoExponiendo &&
+            perfilLocal &&
+            configActual.equipoExponiendo !== perfilLocal.equipo
+          ) {
+            const idVoto = `${clase.horario}_${configActual.equipoExponiendo}_${userLocal.uid}`;
+
+            // Escuchar si el alumno ya votó
+            onSnapshot(doc(db, "votaciones", idVoto), (v) => {
+              panel.classList.remove("hidden");
+              document.getElementById("txt-equipo-expo").innerText =
+                configActual.equipoExponiendo;
+
+              if (!v.exists()) {
+                // No ha votado aún - mostrar formulario
+                document
+                  .getElementById("voto-confirmado")
+                  .classList.add("hidden");
+                document
+                  .getElementById("formulario-rubrica")
+                  .classList.remove("hidden");
+                document
+                  .getElementById("btn-enviar-voto")
+                  .classList.remove("hidden");
+                renderizarFormularioVotacion();
+              } else {
+                // Ya votó - mostrar mensaje de confirmación
+                document
+                  .getElementById("voto-confirmado")
+                  .classList.remove("hidden");
+                document
+                  .getElementById("formulario-rubrica")
+                  .classList.add("hidden");
+                document
+                  .getElementById("btn-enviar-voto")
+                  .classList.add("hidden");
+              }
+            });
+          } else {
+            // No hay equipo exponiendo o el alumno es del equipo expositor
+            panel.classList.add("hidden");
+          }
+        });
+
+        // ========== PERFIL DEL ALUMNO ==========
+        onSnapshot(
+          doc(db, "clases", claseID, "estudiantes", userLocal.uid),
+          (snap) => {
+            const data = snap.data();
+            if (!data) return;
+
+            perfilLocal = data;
+            console.log("Perfil cargado:", perfilLocal);
+
+            // Saludo personalizado
+            document.getElementById("alumno-saludo").innerText =
+              `¡ ${perfilLocal.nombre.split(" ")[0]}!`;
+
+            // Nombre del equipo
+            document.getElementById("alumno-equipo").innerText =
+              perfilLocal.equipo;
+
+            // Actualizar medallas
+            const m = data.medallas || {};
+            document.getElementById("rank-limon").innerText = m.limon || 0;
+            document.getElementById("rank-bronce").innerText = m.bronce || 0;
+            document.getElementById("rank-plata").innerText = m.plata || 0;
+            document.getElementById("rank-oro").innerText = m.oro || 0;
+            document.getElementById("rank-diamante").innerText =
+              m.diamante || 0;
+
+            // NOTIFICACIÓN VISUAL DE MEDALLAS (cuando se gana una nueva)
+            if (medallasPrevias) {
+              const keys = {
+                limon: "🍋",
+                bronce: "🥉",
+                plata: "🥈",
+                oro: "🥇",
+                diamante: "💎",
+              };
+
+              Object.keys(keys).forEach((k) => {
+                if ((m[k] || 0) > (medallasPrevias[k] || 0)) {
+                  mostrarNotificacion(keys[k], k);
+                }
+              });
+            }
+
+            medallasPrevias = { ...m };
+
+            // Escuchar el podio de destacados
+            escucharPodio(claseID);
+          },
+        );
+
+        // ========== ESCUCHAR COLA DE PARTICIPACIÓN ==========
+        onSnapshot(
+          query(
+            collection(db, "clases", claseID, "cola"),
+            orderBy("timestamp", "asc"),
+          ),
+          (snap) => {
+            const lista = snap.docs.map((d) => d.id);
+            const idx = lista.indexOf(userLocal.uid);
+
+            // Si el alumno está en la cola, ocultar el botón YO y mostrar su posición
+            document
+              .getElementById("container-accion")
+              .classList.toggle("hidden", idx !== -1);
+
+            document
+              .getElementById("status-cola")
+              .classList.toggle("hidden", idx === -1);
+
+            if (idx !== -1) {
+              document.getElementById("pos-numero").innerText = idx + 1;
+            }
+          },
+        );
+      }
+
+      function renderizarFormularioVotacion() {
+        const container = document.getElementById("formulario-rubrica");
+        container.innerHTML = "";
+        RUBRICA.forEach((crit) => {
+          votosActuales[crit.id] = null;
+          const card = document.createElement("div");
+          card.className = "bg-white p-2 rounded-xl border";
+          card.innerHTML = `<p class="text-[8px] font-black text-black mb-1 uppercase">${crit.label}</p>
+    <div class="flex justify-between gap-1">${[1, 2, 3, 4, 5].map((n) => `<button onclick="seleccionarNota('${crit.id}',${n})" id="btn-${crit.id}-${n}" class="flex-1 py-1 border rounded bg-white text-[10px] font-bold text-slate-400 border-slate-200">${n}</button>`).join("")}</div>`;
+          container.appendChild(card);
+        });
+        const sug = document.createElement("div");
+        sug.className = "mt-4";
+        sug.innerHTML = `<label class="text-[8px] font-black text-slate-400 uppercase">Sugerencias (Máx 100 car.)</label>
+  <textarea id="txt-sugerencia" maxlength="100" class="w-full border rounded-xl p-2 text-xs outline-none focus:ring-2 focus:ring-orange-500" rows="2" placeholder="Obligatorio..."></textarea>`;
+        container.appendChild(sug);
+      }
+
+      window.seleccionarNota = (cid, n) => {
+        console.log("Seleccionando nota:", cid, n); // Para depuración
+
+        // Guardar el valor seleccionado
+        votosActuales[cid] = n;
+
+        // Resetear todos los botones de este criterio (valores 1 a 5)
+        for (let i = 1; i <= 5; i++) {
+          const btn = document.getElementById(`btn-${cid}-${i}`);
+          if (btn) {
+            btn.className =
+              "flex-1 py-1 border rounded bg-white text-[10px] font-bold text-slate-400 border-slate-200";
+          }
+        }
+
+        // Resaltar el botón seleccionado
+        const btnSeleccionado = document.getElementById(`btn-${cid}-${n}`);
+        if (btnSeleccionado) {
+          btnSeleccionado.className =
+            "flex-1 py-1 border rounded bg-orange-600 text-white text-[10px] font-bold border-orange-600";
+        } else {
+          console.error("No se encontró el botón:", `btn-${cid}-${n}`);
+        }
+      };
+
+      window.enviarVoto = async () => {
+        console.log("=== ENVIANDO VOTO ===");
+        console.log("votosActuales:", votosActuales);
+
+        const com = document.getElementById("txt-sugerencia").value.trim();
+        console.log("Sugerencia:", com);
+
+        const votosIncompletos = Object.values(votosActuales).some(
+          (v) => v === null,
+        );
+        console.log("Votos incompletos:", votosIncompletos);
+
+        if (votosIncompletos) {
+          alert("❌ Completa todos los criterios de evaluación (1-5)");
+          return;
+        }
+
+        if (com.length < 5) {
+          alert("❌ Escribe una sugerencia de al menos 5 caracteres");
+          return;
+        }
+
+        if (!configActual.equipoExponiendo) {
+          console.error("configActual.equipoExponiendo no está definido");
+          alert("Error: No hay un equipo exponiendo en este momento.");
+          return;
+        }
+
+        console.log(
+          "configActual.equipoExponiendo:",
+          configActual.equipoExponiendo,
+        );
+
+        // Obtener la clase actual
+        const claseID = localStorage.getItem("claseSeleccionada");
+        console.log("claseID:", claseID);
+
+        if (!claseID) {
+          alert("Error: No hay clase seleccionada");
+          return;
+        }
+
+        const claseRef = doc(db, "clases", claseID);
+        const claseSnap = await getDoc(claseRef);
+
+        if (!claseSnap.exists()) {
+          alert("Error: La clase ya no existe");
+          return;
+        }
+
+        const clase = claseSnap.data();
+        console.log("Datos de la clase:", clase);
+        console.log("clase.horario:", clase.horario);
+
+        const horario = clase.horario;
+
+        if (!horario) {
+          console.error("El horario de la clase es undefined");
+          alert("Error: La clase no tiene horario definido");
+          return;
+        }
+
+        const idV = `${horario}_${configActual.equipoExponiendo}_${userLocal.uid}`;
+        console.log("ID del voto:", idV);
+
+        try {
+          const votoRef = doc(db, "votaciones", idV);
+          const votoSnap = await getDoc(votoRef);
+
+          if (votoSnap.exists()) {
+            alert(
+              "⚠️ Ya has votado por este equipo. No puedes votar nuevamente.",
+            );
+            return;
+          }
+
+          await setDoc(votoRef, {
+            horario: horario,
+            equipoExpo: configActual.equipoExponiendo,
+            voterUid: userLocal.uid,
+            votos: votosActuales,
+            sugerencia: com,
+            timestamp: serverTimestamp(),
+          });
+
+          console.log("Voto guardado exitosamente");
+          mostrarNotificacion("✅", "¡Voto registrado correctamente!");
+
+          document.getElementById("voto-confirmado").classList.remove("hidden");
+          document.getElementById("formulario-rubrica").classList.add("hidden");
+          document.getElementById("btn-enviar-voto").classList.add("hidden");
+        } catch (error) {
+          console.error("Error al enviar voto:", error);
+          alert("Error al enviar el voto: " + error.message);
+        }
+      };
+
+      window.entrarEnCola = async function () {
+        try {
+          // Verificar autenticación
+          const alumno = auth.currentUser;
+          if (!alumno) {
+            alert("Debes iniciar sesión primero");
+            return;
+          }
+
+          // Obtener la clase seleccionada
+          const claseID = localStorage.getItem("claseSeleccionada");
+          if (!claseID) {
+            alert("Debes registrarte en una clase primero");
+            return;
+          }
+
+          // Verificar que la clase existe y la cola está abierta
+          const claseRef = doc(db, "clases", claseID);
+          const claseSnap = await getDoc(claseRef);
+
+          if (!claseSnap.exists()) {
+            alert("La clase ya no existe");
+            return;
+          }
+
+          const clase = claseSnap.data();
+
+          if (!clase.colaAbierta) {
+            alert("La participación está cerrada en este momento");
+            return;
+          }
+
+          // Verificar si el alumno ya está en la cola
+          const colaRef = doc(db, "clases", claseID, "cola", alumno.uid);
+          const colaSnap = await getDoc(colaRef);
+
+          if (colaSnap.exists()) {
+            alert("Ya estás en la cola de participación");
+            return;
+          }
+
+          // Agregar a la cola
+          await setDoc(colaRef, {
+            uid: alumno.uid,
+            nombre: perfilLocal?.nombre || "Alumno",
+            apellido: perfilLocal?.apellido || "",
+            equipo: perfilLocal?.equipo || "Sin equipo",
+            timestamp: serverTimestamp(), // Usar timestamp, no time
+          });
+
+          mostrarNotificacion(
+            "✅",
+            "¡Te has unido a la cola de participación!",
+          );
+        } catch (error) {
+          console.error("Error al entrar en cola:", error);
+          alert("Error al unirte a la cola. Por favor, intenta de nuevo.");
+        }
+      };
+
+      function mostrarNotificacion(emoji, mensaje) {
+        const el = document.getElementById("notificacion-logro");
+        if (!el) return;
+        document.getElementById("logro-emoji").innerText = emoji;
+        document.getElementById("logro-texto").innerText = mensaje;
+        el.classList.remove("hidden");
+        setTimeout(() => el.classList.add("hidden"), 3000);
+      }
+
+      //cambiado
+      function escucharPodio(claseID) {
+        onSnapshot(collection(db, "clases", claseID, "estudiantes"), (snap) => {
+          let list = [];
+
+          snap.forEach((d) => {
+            const a = d.data();
+            const m = a.medallas || {};
+
+            if (
+              (m.plata || 0) > 0 ||
+              (m.oro || 0) > 0 ||
+              (m.diamante || 0) > 0
+            ) {
+              // Construir nombre completo: nombre + apellido
+              const nombreCompleto =
+                (a.nombre || "") + " " + (a.apellido || "");
+
+              list.push({
+                nombre: nombreCompleto.trim(),
+                plata: m.plata || 0,
+                oro: m.oro || 0,
+                diamante: m.diamante || 0,
+              });
+            }
+          });
+
+          list.sort(
+            (a, b) =>
+              b.diamante - a.diamante || b.oro - a.oro || b.plata - a.plata,
+          );
+
+          const tb = document.getElementById("podio-body");
+
+          tb.innerHTML = list.length
+            ? ""
+            : '<tr><td colspan="5" class="py-4 opacity-40 italic">Esperando aportes...</td></tr>';
+
+          list.slice(0, 3).forEach((al) => {
+            const r = document.createElement("tr");
+
+            r.className = "border-b border-blue-800/50 last:border-0";
+
+            // Mostrar nombre completo sin truncar
+            r.innerHTML = `
+        <td class="py-3 text-left font-bold truncate max-w-[120px]">${escapeHtml(al.nombre)}</td>
+        <td class="text-center">${al.plata}</td>
+        <td class="text-center text-yellow-400 font-black">${al.oro}</td>
+        <td class="text-center text-blue-300 font-black">${al.diamante}</td>        
+      `;
+
+            tb.appendChild(r);
+          });
+        });
+      }
+      //cambiado fin
+      //agregado
+
+      window.escucharClasesHorario = function (horario) {
+        const contenedor = document.getElementById("lista-clases-horario");
+
+        if (!horario) {
+          contenedor.innerHTML = "";
+          return;
+        }
+
+        contenedor.innerHTML =
+          '<div class="text-xs text-slate-500">Buscando clases...</div>';
+
+        // Obtener todas las clases del horario
+        const q = query(
+          collection(db, "clases"),
+          where("horario", "==", horario),
+        );
+
+        onSnapshot(q, async (snap) => {
+          contenedor.innerHTML = "";
+
+          if (snap.empty) {
+            contenedor.innerHTML = `
+        <div class="text-xs text-slate-500 bg-gray-50 p-3 rounded-lg border border-gray-200">
+          📭 No hay clases creadas en este horario
+        </div>
+      `;
+            return;
+          }
+
+          // Obtener las clases en las que el alumno ya está inscrito
+          const misClasesSet = new Set();
+
+          if (userLocal) {
+            // CAMBIADO: usar 'documento' en lugar de 'doc' para no sobrescribir la función doc
+            for (const documento of snap.docs) {
+              const claseId = documento.id;
+              const estudianteRef = doc(
+                db,
+                "clases",
+                claseId,
+                "estudiantes",
+                userLocal.uid,
+              );
+              const estudianteSnap = await getDoc(estudianteRef);
+              if (estudianteSnap.exists()) {
+                misClasesSet.add(claseId);
+              }
+            }
+          }
+
+          // CAMBIADO: usar 'documento' en lugar de 'doc' aquí también
+          snap.forEach((documento) => {
+            const clase = documento.data();
+            const claseId = documento.id;
+            const registroAbierto = clase.registroAbierto || false;
+            const yaInscrito = misClasesSet.has(claseId);
+
+            // Determinar el estado y color
+            let estadoTexto = "";
+            let estadoColor = "";
+            let botonTexto = "";
+            let botonAccion = "";
+            let botonDisabled = false;
+
+            if (yaInscrito) {
+              estadoTexto = "INSCRITO";
+              estadoColor = "bg-purple-100 text-purple-700";
+              botonTexto = "📖 Entrar";
+              botonAccion = `entrarAClase('${claseId}', '${escapeHtml(clase.materia)}')`;
+            } else if (registroAbierto) {
+              estadoTexto = "ABIERTO";
+              estadoColor = "bg-green-100 text-green-700";
+              botonTexto = "📋 Inscribirse";
+              botonAccion = `inscribirseEnClase('${claseId}', '${escapeHtml(clase.materia)}')`;
+            } else {
+              estadoTexto = "CERRADO";
+              estadoColor = "bg-red-100 text-red-700";
+              botonTexto = "🔒 Cerrado";
+              botonDisabled = true;
+            }
+
+            const item = document.createElement("div");
+            item.className = `bg-white border p-3 rounded-xl flex justify-between items-center ${
+              yaInscrito
+                ? "border-purple-300 bg-purple-50"
+                : registroAbierto
+                  ? "border-green-200"
+                  : "border-gray-200 bg-gray-50"
+            }`;
+
+            item.innerHTML = `
+        <div class="flex flex-col flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-sm">${escapeHtml(clase.profesorNombre)}</span>
+            <span class="text-[8px] font-bold px-1.5 py-0.5 rounded-full ${estadoColor}">
+              ${estadoTexto}
+            </span>
+          </div>
+          <span class="text-xs text-slate-500">${escapeHtml(clase.materia)}</span>
+          <span class="text-[9px] text-slate-400 mt-0.5">Horario: ${clase.horario}</span>
+        </div>
+        ${
+          botonDisabled
+            ? `<button disabled class="bg-gray-300 text-gray-500 px-3 py-1 rounded-lg text-xs font-bold cursor-not-allowed">${botonTexto}</button>`
+            : `<button onclick="${botonAccion}" class="px-3 py-1 rounded-lg text-xs font-bold ${
+                yaInscrito
+                  ? "bg-purple-600 text-white hover:bg-purple-700"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }">${botonTexto}</button>`
+        }
+      `;
+            contenedor.appendChild(item);
+          });
+        });
+      };
+
+      //agregado fin
+      //agregado
+      // Función de registro del alumno
+      window.registrarseClase = async function () {
+        if (!auth.currentUser) {
+          alert("Debes iniciar sesión");
+          return;
+        }
+
+        const nombre = document.getElementById("reg-nombre").value.trim();
+        const apellido = document.getElementById("reg-apellido").value.trim();
+        const horario = document.getElementById("reg-horario").value;
+        const equipo = document.getElementById("reg-equipo").value;
+        const claseSeleccionada = localStorage.getItem(
+          "claseSeleccionadaTemporal",
+        );
+
+        // Validaciones
+        if (!nombre || !apellido) {
+          alert("❌ Completa tu nombre y apellido");
+          return;
+        }
+
+        if (!horario) {
+          alert("❌ Selecciona un horario primero");
+          return;
+        }
+
+        if (!claseSeleccionada) {
+          alert(
+            "❌ Primero selecciona una clase de la lista (haz clic en 'Seleccionar' en la clase que deseas)",
+          );
+          return;
+        }
+
+        if (!equipo || equipo === "") {
+          alert(
+            "❌ Selecciona un equipo de la lista. Si no hay equipos disponibles, contacta a tu profesor.",
+          );
+          return;
+        }
+
+        try {
+          // Verificar que la clase aún existe y el registro sigue abierto
+          const claseRef = doc(db, "clases", claseSeleccionada);
+          const claseSnap = await getDoc(claseRef);
+
+          if (!claseSnap.exists()) {
+            alert("❌ La clase ya no existe");
+            return;
+          }
+
+          const clase = claseSnap.data();
+
+          if (!clase.registroAbierto) {
+            alert(
+              "❌ El registro para esta clase se ha cerrado. Contacta a tu profesor.",
+            );
+            return;
+          }
+
+          const alumno = auth.currentUser;
+          const estudianteRef = doc(
+            db,
+            "clases",
+            claseSeleccionada,
+            "estudiantes",
+            alumno.uid,
+          );
+          const estudianteSnap = await getDoc(estudianteRef);
+
+          if (estudianteSnap.exists()) {
+            if (
+              confirm(
+                "Ya estás registrado en esta clase. ¿Deseas actualizar tu información?",
+              )
+            ) {
+              await updateDoc(estudianteRef, {
+                nombre: nombre,
+                apellido: apellido,
+                equipo: equipo,
+                horario: clase.horario,
+                fechaActualizacion: serverTimestamp(),
+              });
+              mostrarNotificacion("🔄", "¡Información actualizada!");
+            } else {
+              return;
+            }
+          } else {
+            await setDoc(estudianteRef, {
+              nombre: nombre,
+              apellido: apellido,
+              equipo: equipo,
+              horario: clase.horario,
+              medallas: {
+                limon: 0,
+                bronce: 0,
+                plata: 0,
+                oro: 0,
+                diamante: 0,
+              },
+              puntos: 0,
+              fechaRegistro: serverTimestamp(),
+              uid: alumno.uid,
+            });
+            mostrarNotificacion(
+              "✅",
+              `¡Registro completado! Bienvenido a la clase de ${clase.materia}`,
+            );
+          }
+
+          localStorage.setItem("claseSeleccionada", claseSeleccionada);
+          localStorage.removeItem("claseSeleccionadaTemporal");
+
+          // Recargar después de 1.5 segundos
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
+        } catch (error) {
+          console.error("Error al registrar:", error);
+          alert("Error al registrarte. Por favor, intenta de nuevo.");
+        }
+      };
+      window.refrescarClases = function () {
+        // Llamar a la función que carga las clases
+        escucharClasesHorario();
+        mostrarNotificacion("🔄", "Buscando clases disponibles...");
+      };
+      // Función para seleccionar una clase y cargar sus grupos
+      window.seleccionarClaseYRellenarGrupos = async function (
+        claseID,
+        materia,
+      ) {
+        console.log("Seleccionando clase:", claseID, materia);
+
+        try {
+          // Primero verificar si el registro sigue abierto
+          const claseRef = doc(db, "clases", claseID);
+          const claseSnap = await getDoc(claseRef);
+
+          if (!claseSnap.exists()) {
+            alert("La clase ya no existe");
+            return;
+          }
+
+          const clase = claseSnap.data();
+
+          if (!clase.registroAbierto) {
+            alert(
+              "❌ El registro para esta clase está cerrado. Contacta a tu profesor.",
+            );
+            return;
+          }
+
+          // GUARDAR LA CLASE SELECCIONADA
+          localStorage.setItem("claseSeleccionadaTemporal", claseID);
+
+          // Obtener el selector de equipos
+          const selEquipo = document.getElementById("reg-equipo");
+
+          if (!selEquipo) {
+            console.error("No se encontró el elemento reg-equipo");
+            return;
+          }
+
+          // HABILITAR EL SELECTOR DE EQUIPOS
+          selEquipo.disabled = false;
+
+          // Mostrar mensaje de carga
+          selEquipo.innerHTML =
+            '<option value="">-- Cargando equipos... --</option>';
+
+          // Cargar los grupos de esta clase
+          const gruposRef = collection(db, "clases", claseID, "grupos");
+          const gruposSnapshot = await getDocs(gruposRef);
+
+          if (gruposSnapshot.empty) {
+            selEquipo.innerHTML =
+              '<option value="">-- No hay grupos disponibles --</option>';
+            selEquipo.disabled = true;
+          } else {
+            selEquipo.innerHTML =
+              '<option value="">-- Selecciona tu equipo --</option>';
+
+            gruposSnapshot.forEach((doc) => {
+              const grupo = doc.data();
+              const opt = document.createElement("option");
+              opt.value = grupo.nombre;
+              opt.innerText = grupo.nombre;
+              selEquipo.appendChild(opt);
+            });
+          }
+
+          // Mostrar notificación
+          mostrarNotificacion(
+            "✅",
+            `Clase "${materia}" seleccionada. Ahora elige tu equipo.`,
+          );
+
+          // Resaltar la clase seleccionada visualmente
+          const contenedor = document.getElementById("lista-clases-horario");
+          if (contenedor) {
+            const items = contenedor.querySelectorAll(".bg-white");
+            items.forEach((item) => {
+              item.classList.remove("border-green-500", "bg-green-50");
+              const button = item.querySelector("button");
+              if (
+                button &&
+                button.getAttribute("onclick") &&
+                button.getAttribute("onclick").includes(claseID)
+              ) {
+                item.classList.add(
+                  "border-2",
+                  "border-green-500",
+                  "bg-green-50",
+                );
+              }
+            });
+          }
+
+          // Hacer scroll al selector de equipos
+          selEquipo.scrollIntoView({ behavior: "smooth", block: "center" });
+        } catch (error) {
+          console.error("Error al cargar grupos:", error);
+          alert("Error al cargar los grupos de la clase: " + error.message);
+        }
+      };
+
+      window.salirDeClase = function () {
+        if (
+          confirm("¿Salir de la clase actual? Volverás al selector de clases.")
+        ) {
+          localStorage.removeItem("claseSeleccionada");
+          location.reload();
+        }
+      };
+
+      // Función para entrar a una clase ya inscrita
+      window.entrarAClase = async function (claseID, materia) {
+        try {
+          // Verificar que el alumno sigue inscrito
+          const estudianteRef = doc(
+            db,
+            "clases",
+            claseID,
+            "estudiantes",
+            userLocal.uid,
+          );
+          const estudianteSnap = await getDoc(estudianteRef);
+
+          if (!estudianteSnap.exists()) {
+            alert("Ya no estás inscrito en esta clase");
+            return;
+          }
+
+          localStorage.setItem("claseSeleccionada", claseID);
+          mostrarNotificacion("📚", `Entrando a clase: ${materia}`);
+          location.reload();
+        } catch (error) {
+          console.error("Error al entrar a clase:", error);
+          alert("Error al entrar a la clase");
+        }
+      };
+
+      // Función para inscribirse en una nueva clase
+      window.inscribirseEnClase = async function (claseID, materia) {
+        // Guardar la clase temporalmente
+        localStorage.setItem("claseSeleccionadaTemporal", claseID);
+        // Llamar a la función de registro existente
+        seleccionarClaseYRellenarGrupos(claseID, materia);
+      };
+    </script>
+  </body>
+</html>

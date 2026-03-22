@@ -1,0 +1,2504 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Click-YO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>Ω</text></svg>"
+    />
+  </head>
+  <body class="bg-slate-000">
+    <div
+      id="notificacion-logro"
+      class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden animate-bounce"
+    >
+      <div
+        class="bg-white border-2 border-blue-500 shadow-2xl rounded-2xl px-6 py-3 flex items-center gap-3"
+      >
+        <span id="logro-emoji" class="text-3xl"></span>
+        <div>
+          <p class="text-[10px] font-black uppercase text-blue-500">Sistema</p>
+          <p id="logro-texto" class="font-bold text-slate-700"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="app" class="max-w-md mx-auto p-4 min-h-screen flex flex-col">
+      <header class="py-4 text-center border-b mb-4">
+        <h1 class="text-2xl font-bold text-blue-700">Click YO</h1>
+        <div
+          id="status-bar"
+          class="text-[10px] font-bold uppercase text-black mt-1 tracking-widest"
+        >
+          Panel de Control - Profesor
+        </div>
+        <div id="profesor-info" class="mt-2 text-xs text-slate-500">
+          <!-- Aquí se mostrará la información del profesor -->
+        </div>
+      </header>
+
+      <div
+        id="section-login"
+        class="mt-20 flex-1 flex flex-col justify-center items-center"
+      >
+        <div
+          class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 w-full text-center"
+        >
+          <button
+            onclick="login()"
+            class="w-full bg-white border border-slate-300 flex items-center justify-center gap-3 py-3 rounded-xl shadow-sm"
+          >
+            <span class="font-semibold text-slate-700"
+              >Entrar con Google (Profesor)</span
+            >
+          </button>
+        </div>
+      </div>
+
+      <div id="section-profesor" class="hidden">
+        <!-- Crear horario -->
+        <!-- CONTENEDOR MAESTRO DEL ACORDEÓN -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 mb-2">
+          <!-- Cabecera con el Triángulo (Visible siempre) -->
+          <div
+            class="flex justify-between items-center p-3 cursor-pointer hover:bg-slate-700 rounded-t-xl"
+            onclick="
+              togglePanel('gestion-clases-body', 'triangulo-clases-icon')
+            "
+          >
+            <h3 class="text-white text-[10px] uppercase font-bold opacity-90">
+              Gestión de Clases y Horarios
+            </h3>
+            <span
+              id="triangulo-clases-icon"
+              class="text-white text-xs transition-transform duration-300 transform rotate-180"
+            >
+              ▲
+            </span>
+          </div>
+
+          <!-- CUERPO DEL ACORDEÓN (Inicia cerrado con 'hidden') -->
+          <div
+            id="gestion-clases-body"
+            class="hidden p-4 space-y-4 border-t border-slate-700"
+          >
+            <!-- Parte 1: Crear Clase -->
+            <div class="flex gap-2">
+              <select
+                id="crear-horario"
+                class="bg-orange-500 text-black border border-slate-700 px-3 py-2 rounded-lg text-sm"
+              >
+                <option value="">Horario</option>
+                <option>SA</option>
+                <option>A</option>
+                <option>SB</option>
+                <option>B</option>
+                <option>SC</option>
+                <option>C</option>
+                <option>SD</option>
+                <option>D</option>
+              </select>
+
+              <input
+                id="crear-materia"
+                placeholder="Nombre de la materia"
+                class="bg-slate-900 text-white placeholder-slate-400 border border-slate-700 px-3 py-2 rounded-lg flex-1 text-sm"
+              />
+
+              <button
+                onclick="crearClase()"
+                class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg text-xs text-white font-bold"
+              >
+                Crear clase
+              </button>
+            </div>
+
+            <!-- Parte 2: Lista de Clases -->
+            <div>
+              <h2
+                class="text-[10px] uppercase font-bold opacity-90 text-white mb-2"
+              >
+                Mis clases:
+              </h2>
+              <div
+                id="lista-clases"
+                class="flex flex-col divide-y divide-slate-700 text-[12px] font-bold opacity-70 text-white"
+              >
+                <!-- Contenido dinámico -->
+              </div>
+            </div>
+          </div>
+          <!-- Cierre del body -->
+        </div>
+
+        <!-- Fin agregado -->
+
+        <!-- Sistema de Evaluación -->
+        <div
+          class="bg-slate-800 rounded-xl border border-slate-700 mb-2 overflow-hidden"
+        >
+          <!-- Cabecera (Siempre visible) -->
+          <div
+            class="flex justify-between items-center cursor-pointer p-3"
+            onclick="togglePanel('sistema-evaluacion-body', 'triangulo-icon')"
+          >
+            <h3 class="text-white text-[10px] uppercase font-bold opacity-90">
+              Sistema de Evaluación de la comunidad
+            </h3>
+
+            <!-- El triángulo que rota -->
+            <!-- 1. Añadimos rotate-180 aquí -->
+            <span
+              id="triangulo-icon"
+              class="text-white text-xs transition-transform duration-300 transform rotate-180"
+            >
+              ▲
+            </span>
+          </div>
+          <!-- CUERPO DEL ACORDEÓN (Ahora envuelve todo) -->
+          <!-- 2. Añadimos hidden aquí para que empiece cerrado -->
+          <div
+            id="sistema-evaluacion-body"
+            class="hidden transition-all duration-300 p-4 pt-0 border-t border-slate-700"
+          >
+            <select
+              id="prof-equipo-expo"
+              class="w-full p-1 rounded-lg border-2 border-orange-300 mb-2 font-bold text-sm"
+            >
+              <option value="">-- Seleccionar Equipo Expositor --</option>
+            </select>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                onclick="iniciarVotacion()"
+                class="bg-orange-600 text-white py-2 rounded-lg font-bold text-[9px] uppercase"
+              >
+                Activar Votación
+              </button>
+              <button
+                onclick="terminarVotacion()"
+                class="bg-green-600 text-white py-2 rounded-lg font-bold text-[9px] uppercase"
+              >
+                Cerrar Votación
+              </button>
+            </div>
+            <div
+              id="stats-votacion"
+              class="mt-4 hidden bg-white p-3 rounded-xl border border-orange-200 shadow-sm"
+            >
+              <div class="flex justify-between items-center border-b pb-2 mb-2">
+                <span class="font-black text-orange-700 text-[10px]"
+                  >PROMEDIO GRAL:</span
+                >
+                <p class="text-[9px] text-slate-400 font-bold uppercase">
+                  <span id="votos-contados">0</span> votos recibidos
+                </p>
+                <span id="avg-total" class="text-xl font-black text-orange-600"
+                  >0.0</span
+                >
+              </div>
+              <div
+                id="desglose-criterios"
+                class="space-y-1 text-[9px] font-bold text-slate-500 uppercase"
+              ></div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <button
+                onclick="resetVotacionActual()"
+                class="bg-red-100 text-red-600 py-2 rounded-lg font-bold text-[9px] uppercase border border-red-200"
+              >
+                Reset votos Equipo Actual
+              </button>
+              <button
+                onclick="exportarMedallasCSV()"
+                class="bg-blue-600 text-white py-2 rounded-lg font-bold text-[9px] uppercase"
+              >
+                Descargar Datos de Participacion
+              </button>
+            </div>
+
+            <button
+              onclick="resetTodasVotaciones()"
+              class="w-full mt-2 bg-red-600 text-white py-2 rounded-lg font-bold text-[9px] uppercase"
+            >
+              Reset Votos Todo el Horario
+            </button>
+
+            <button
+              onclick="exportarVotacionesCSV()"
+              class="w-full mt-2 bg-green-600 text-white py-2 rounded-lg font-bold text-[9px] uppercase"
+            >
+              Exportar Votos CSV
+            </button>
+            <!--
+          <button
+            onclick="reiniciarMedallasPorGrupo()"
+            class="w-full py-3 bg-yellow-50 text-yellow-700 rounded-xl text-[10px] font-black uppercase border border-yellow-200 mb-2"
+          >
+            🏅 Reiniciar Medallas del Grupo
+          </button>
+          -->
+            <button
+              onclick="verAlumnosPendientes()"
+              class="w-full mt-2 bg-blue-100 text-blue-700 py-2 rounded-lg font-bold text-[9px] uppercase border border-blue-200"
+            >
+              🔍 Ver quién falta por votar
+            </button>
+          </div>
+        </div>
+        <!--fin acordeon-->
+
+        <!-- Filtro de horario -->
+        <div class="bg-blue-900 p-3 rounded-xl text-white mb-1">
+          <label class="text-[10px] uppercase font-bold opacity-90"
+            >Horario Seleccionado:</label
+          >
+          <select
+            id="filtro-horario"
+            onchange="actualizarTodoProfesor()"
+            class="w-full bg-blue-500 p-2 rounded-lg text-[12px] font-bold opacity-70 outline-none border-none mt-1"
+          >
+            <option value="">Seleccionar clase</option>
+          </select>
+
+          <!-- Input para nuevo grupo -->
+
+          <!-- CONTENEDOR MAESTRO DE GRUPOS -->
+          <div
+            class="mt-2 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden"
+          >
+            <!-- Cabecera del Acordeón (Visible siempre) -->
+            <div
+              class="flex justify-between items-center p-3 cursor-pointer hover:bg-slate-700 bg-slate-900"
+              onclick="
+                togglePanel('gestion-grupos-body', 'triangulo-grupos-icon')
+              "
+            >
+              <h3 class="text-white text-[10px] uppercase font-bold opacity-90">
+                Gestión de Grupos
+              </h3>
+              <span
+                id="triangulo-grupos-icon"
+                class="text-white text-xs transition-transform duration-300 transform rotate-180"
+              >
+                ▲
+              </span>
+            </div>
+
+            <!-- CUERPO DEL ACORDEÓN (Inicia cerrado) -->
+            <div
+              id="gestion-grupos-body"
+              class="hidden p-4 bg-slate-800 border-t border-slate-700"
+            >
+              <!-- Parte 1: Input de creación -->
+              <div class="mb-4">
+                <label class="block text-white text-xs font-bold mb-2"
+                  >Crear nuevo grupo:</label
+                >
+                <div class="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    id="nuevoGrupo"
+                    placeholder="Nombre del grupo"
+                    class="flex-1 bg-yellow-100 border p-1 rounded-md text-sm text-black outline-none"
+                  />
+                  <button
+                    onclick="crearGrupo()"
+                    class="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 text-xs font-bold"
+                  >
+                    Crear
+                  </button>
+                </div>
+              </div>
+
+              <!-- Parte 2: Lista dinámica -->
+              <div id="lista-grupos" class="space-y-1">
+                <!-- Los grupos se cargarán aquí dinámicamente -->
+              </div>
+            </div>
+            <!-- Cierre del body -->
+          </div>
+        </div>
+        <!--fin input nuevo grupo-->
+
+        <!-- Línea divisoria -->
+        <hr class="border-t border-gray-300 my-4" />
+
+        <div class="mb-1">
+          <button
+            onclick="limpiarCola()"
+            class="w-full mt-2 bg-orange-600 py-2 rounded-lg font-bold text-white text-[10px] uppercase"
+          >
+            Vaciar Cola de participacion
+          </button>
+        </div>
+
+        <!--Boton cola abierta cerrada-->
+        <div class="grid grid-cols-2 gap-2 mb-6">
+          <button
+            id="btn-master-switch"
+            onclick="toggleParticipacion()"
+            class="py-4 rounded-xl font-black text-gray-300 text-[10px] uppercase bg-gray-200 border-2 border-gray-300"
+          >
+            participacion
+          </button>
+
+          <!--Boton registro abierto cerrado -->
+          <button
+            id="btn-lock-registro"
+            onclick="toggleRegistroBloqueado()"
+            class="py-4 rounded-xl font-black text-gray-300 text-[10px] uppercase bg-gray-200 border-2 border-gray-300"
+          >
+            Registro
+          </button>
+        </div>
+
+        <div class="space-y-2 mb-8" id="lista-cola"></div>
+
+        <div class="flex justify-between items-center mb-2 px-1">
+          <h3
+            class="font-bold text-slate-500 text-[10px] uppercase tracking-widest"
+          >
+            Alumnos Registrados
+          </h3>
+          <span
+            class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[9px] font-black"
+            >TOTAL: <span id="total-registrados">0</span></span
+          >
+        </div>
+
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6"
+        >
+          <div id="tabla-notas" class="max-h-96 overflow-y-auto"></div>
+        </div>
+      </div>
+      <!-- FOOTER -->
+      <footer class="mt-8 pb-4 border-t border-slate-200 pt-4 text-center">
+        <p
+          class="text-[10px] text-slate-400 font-medium tracking-widest uppercase"
+        >
+        <a
+            href="https://github.com/orhurtado/click-yo"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-blue-900 font-bold "
+          >
+          'CLICK-YO'
+          </a> BY
+          <span class="font-bold text-slate-500">OHM</span>
+          <a
+            href="https://opensource.org/license/mit"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-blue-900 transition-colors"
+          >
+            (MIT License)
+          </a>
+          2026
+          <br />
+          V.3.0 Rev.0
+        </p>
+      </footer>
+    </div>
+
+    <!--
+// Código JavaScript 
+-->
+
+    <script type="module">
+      window.claseActiva = null;
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        signInWithPopup,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        deleteDoc,
+        collection,
+        query,
+        where,
+        orderBy,
+        onSnapshot,
+        getDocs,
+        writeBatch,
+        increment,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+	//CONFIGURACION PARA FIREBASE
+      const firebaseConfig = {
+        apiKey: "xxxxxxxxxxxx",
+        authDomain: "xxxxxxxxxxx",
+        projectId: "xxxxxxxxxxx",
+        storageBucket: "xxxx",
+        messagingSenderId: "xxxx",
+        appId: "xxx",
+        measurementId: "xxx",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const provider = new GoogleAuthProvider();
+      const sonidoNotificacion = new Audio("notificacion.mp3");
+
+      const RUBRICA = [
+        {
+          id: "dominio",
+          label:
+            "QUÉ TANTO DOMINIO TENIAN DEL TEMA? (1:NINGUNO .. 5:TOTALMENTE)",
+        },
+        {
+          id: "org",
+          label:
+            "QUÉ TAN BIEN ORGANIZARON LA EXPOSICION? (1:DEFICIENTE .. 5:EXCELENTE)",
+        },
+        {
+          id: "calidad",
+          label: "QUÉ TAN BIEN RESPONDIERON LAS PREGUNTAS? (1:MAL .. 5:BIEN)",
+        },
+        {
+          id: "comunicacion",
+          label: "QUÉ TAN BIEN ENTENDISTE EL TEMA? (1:NADA .. 5:TOTALMENTE)",
+        },
+        {
+          id: "tiempo",
+          label:
+            "SÍ UN EJERCICIO DE ESTE TEMA ENTRARA EN EL EXAMEN PODRIAS REALIZARLO? (1:NO..5:TOTALMENTE)",
+        },
+      ];
+      //actualizado
+      const RANKS = {
+        limon: { pts: 1, key: "medallas.limon" },
+        bronce: { pts: 2, key: "medallas.bronce" },
+        plata: { pts: 3, key: "medallas.plata" },
+        oro: { pts: 5, key: "medallas.oro" },
+        diamante: { pts: 10, key: "medallas.diamante" },
+      };
+      //actualizado fin
+
+      let userLocal, unsubConfig, unsubCola, unsubNotas, unsubVotos;
+      let configActual = {
+        abierta: true,
+        bloqueado: false,
+        equipoExponiendo: null,
+      };
+      let cantidadEnColaPrevia = 0;
+
+      //cambiado para que solo profesores autorizados puedan entrar
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          userLocal = user;
+          const loginSection = document.getElementById("section-login");
+          const profesorSection = document.getElementById("section-profesor");
+          try {
+            const ref = doc(db, "autorizados", user.email.toLowerCase());
+            const snapProfesor = await getDoc(ref);
+
+            if (!snapProfesor.exists()) {
+              alert("Profesor no encontrado en autorizados");
+              return;
+            }
+
+            const dataProfesor = snapProfesor.data();
+            const profesorNombre = dataProfesor.nombreCompleto;
+
+            const snap = await getDoc(ref);
+            if (snap.exists() && snap.data().activo === true) {
+              loginSection.classList.add("hidden");
+              profesorSection.classList.remove("hidden");
+              window.profesorId = user.uid;
+              window.profesorNombre = snap.data().nombreCompleto || user.email;
+              // ========== AGREGAR ESTO: Mostrar información del profesor ==========
+              const profesorInfo = document.getElementById("profesor-info");
+              if (profesorInfo) {
+                const nombreProfesor =
+                  snap.data().nombreCompleto ||
+                  snap.data().nombre ||
+                  user.email;
+                const emailProfesor = user.email;
+                profesorInfo.innerHTML = `
+                <div class="flex justify-center items-center gap-2 text-slate-600">
+                  <span class="font-bold"> ${nombreProfesor}</span>
+                  <span class="text-slate-400">|</span>
+                  <span class="text-slate-500"> ${emailProfesor}</span>
+                </div>
+              `;
+              }
+              // ========== FIN AGREGADO ==========
+              // ========== MODIFICADO: Recuperar última clase seleccionada ==========
+              const ultimaClase = localStorage.getItem(
+                "ultimaClaseSeleccionada",
+              );
+              if (ultimaClase) {
+                // Esperar a que se carguen las clases y luego seleccionar
+                setTimeout(() => {
+                  const selector = document.getElementById("filtro-horario");
+                  if (selector) {
+                    // Verificar si la opción existe
+                    let existe = false;
+                    for (let i = 0; i < selector.options.length; i++) {
+                      if (selector.options[i].value === ultimaClase) {
+                        selector.value = ultimaClase;
+                        existe = true;
+                        break;
+                      }
+                    }
+                    if (existe) {
+                      window.actualizarTodoProfesor();
+                      cargarGruposDeClase(ultimaClase);
+                    }
+                  }
+                }, 1000);
+              }
+              // ========== FIN MODIFICADO ==========
+
+              window.actualizarTodoProfesor();
+              escucharClasesProfesor();
+
+              // Verificar si hay votación activa
+              setTimeout(() => {
+                const claseSeleccionada =
+                  document.getElementById("filtro-horario").value;
+                if (claseSeleccionada) {
+                  const claseRef = doc(db, "clases", claseSeleccionada);
+                  getDoc(claseRef).then((snapClase) => {
+                    if (
+                      snapClase.exists() &&
+                      snapClase.data().equipoExponiendo
+                    ) {
+                      const panelEvaluacion = document.getElementById(
+                        "sistema-evaluacion-body",
+                      );
+                      const iconoTriangulo =
+                        document.getElementById("triangulo-icon");
+
+                      if (
+                        panelEvaluacion &&
+                        panelEvaluacion.classList.contains("hidden")
+                      ) {
+                        panelEvaluacion.classList.remove("hidden");
+                        if (iconoTriangulo) {
+                          iconoTriangulo.classList.remove("rotate-180");
+                        }
+                      }
+                    }
+                  });
+                }
+              }, 1500);
+            } else {
+              alert("Este correo no está autorizado como profesor.");
+              auth.signOut();
+            }
+          } catch (e) {
+            console.error("Error verificando profesor:", e);
+          }
+        } else {
+          document.getElementById("section-login").classList.remove("hidden");
+        }
+      });
+      // FIN CAMBIO
+
+      window.login = () => signInWithPopup(auth, provider);
+
+      window.verAlumnosPendientes = async () => {
+        if (!window.claseActiva) {
+          alert("Primero selecciona una clase");
+          return;
+        }
+
+        const equipoExpo = configActual.equipoExponiendo;
+
+        if (!equipoExpo) {
+          return alert(
+            "Debe haber un equipo exponiendo para verificar quién falta por votar.",
+          );
+        }
+
+        try {
+          // Obtener el horario de la clase actual
+          const claseRef = doc(db, "clases", window.claseActiva);
+          const claseSnap = await getDoc(claseRef);
+
+          if (!claseSnap.exists()) {
+            alert("La clase no existe");
+            return;
+          }
+
+          const clase = claseSnap.data();
+          const horario = clase.horario;
+          const materia = clase.materia || "Sin materia";
+
+          console.log(
+            "Verificando pendientes para horario:",
+            horario,
+            "equipo:",
+            equipoExpo,
+          );
+
+          // Obtener todos los estudiantes de la clase
+          const qEstudiantes = await getDocs(
+            collection(db, "clases", window.claseActiva, "estudiantes"),
+          );
+
+          // Obtener todos los votos para este horario y equipo expositor
+          const qVotos = await getDocs(
+            query(
+              collection(db, "votaciones"),
+              where("horario", "==", horario),
+              where("equipoExpo", "==", equipoExpo),
+            ),
+          );
+
+          // Crear un Set con los UIDs de los alumnos que ya votaron
+          const votantesUids = new Set();
+          qVotos.forEach((doc) => {
+            const data = doc.data();
+            votantesUids.add(data.voterUid);
+          });
+
+          console.log("Votantes registrados:", votantesUids.size);
+
+          // Recopilar alumnos que no han votado y que NO son del equipo expositor
+          const pendientes = [];
+          qEstudiantes.forEach((doc) => {
+            const data = doc.data();
+            const uid = doc.id; // El ID del documento es el UID del alumno
+            const nombreCompleto =
+              (data.nombre || "") + " " + (data.apellido || "");
+            const equipo = data.equipo || "Sin equipo";
+
+            // No considerar al equipo expositor (ellos no votan)
+            if (equipo !== equipoExpo && !votantesUids.has(uid)) {
+              pendientes.push({
+                nombre: nombreCompleto.trim() || "Sin nombre",
+                equipo: equipo,
+                uid: uid,
+              });
+            }
+          });
+
+          // Ordenar por equipo y luego por nombre
+          pendientes.sort((a, b) => {
+            if (a.equipo === b.equipo) {
+              return a.nombre.localeCompare(b.nombre);
+            }
+            return a.equipo.localeCompare(b.equipo);
+          });
+
+          if (pendientes.length === 0) {
+            alert(
+              `✅ ¡Excelente! Todos los alumnos (que no pertenecen al equipo "${equipoExpo}") ya votaron.`,
+            );
+          } else {
+            let mensaje = `📋 ALUMNOS QUE FALTAN POR VOTAR\n`;
+            mensaje += `Clase: ${materia} (${horario})\n`;
+            mensaje += `Equipo expositor: ${equipoExpo}\n`;
+            mensaje += `Total pendientes: ${pendientes.length}\n\n`;
+
+            // Agrupar por equipo para mejor visualización
+            const porEquipo = {};
+            pendientes.forEach((p) => {
+              if (!porEquipo[p.equipo]) porEquipo[p.equipo] = [];
+              porEquipo[p.equipo].push(p.nombre);
+            });
+
+            for (const equipo in porEquipo) {
+              mensaje += `\n📌 EQUIPO ${equipo} (${porEquipo[equipo].length} alumnos):\n`;
+              porEquipo[equipo].forEach((nombre) => {
+                mensaje += `   • ${nombre}\n`;
+              });
+            }
+
+            // Mostrar en un alert (puede ser largo, pero funciona)
+            alert(mensaje);
+
+            // También mostrar en consola para referencia
+            console.log("Alumnos pendientes:", pendientes);
+          }
+        } catch (error) {
+          console.error("Error al verificar pendientes:", error);
+          alert("Error al verificar los alumnos pendientes: " + error.message);
+        }
+      };
+
+      window.actualizarTodoProfesor = () => {
+        const id = document.getElementById("filtro-horario").value;
+        if (!id) return;
+        window.claseActiva = id;
+        const h = id;
+        // GUARDAR: Guardamos el grupo seleccionado en la memoria del navegador
+        localStorage.setItem("ultimaClaseSeleccionada", h);
+        cargarGruposDeClase(id);
+
+        // ========== MODIFICADO: Cargar grupos desde Firestore ==========
+        const selExpo = document.getElementById("prof-equipo-expo");
+        selExpo.innerHTML =
+          '<option value="">-- Seleccionar Equipo Expositor --</option>';
+
+        // Cargar los grupos de la clase seleccionada desde Firestore
+        const gruposRef = collection(
+          db,
+          "clases",
+          window.claseActiva,
+          "grupos",
+        );
+        const qGrupos = query(gruposRef, orderBy("nombre", "asc"));
+
+        onSnapshot(qGrupos, (snapshot) => {
+          // Mantener el valor actual si existe
+          const valorActual = selExpo.value;
+
+          // Limpiar el selector pero mantener la opción por defecto
+          selExpo.innerHTML =
+            '<option value="">-- Seleccionar Equipo Expositor --</option>';
+
+          if (snapshot.empty) {
+            const option = document.createElement("option");
+            option.disabled = true;
+            option.textContent = "No hay grupos disponibles";
+            selExpo.appendChild(option);
+            return;
+          }
+
+          snapshot.forEach((doc) => {
+            const grupo = doc.data();
+            const opt = document.createElement("option");
+            opt.value = grupo.nombre;
+            opt.innerText = grupo.nombre;
+            selExpo.appendChild(opt);
+          });
+
+          // Si había un valor seleccionado y existe en la nueva lista, restaurarlo
+          if (valorActual && valorActual !== "") {
+            let existe = false;
+            for (let i = 0; i < selExpo.options.length; i++) {
+              if (selExpo.options[i].value === valorActual) {
+                selExpo.value = valorActual;
+                existe = true;
+                break;
+              }
+            }
+            // Si no existe y hay un equipo exponiendo, sincronizar después
+            if (!existe && configActual.equipoExponiendo) {
+              setTimeout(() => {
+                sincronizarSelectorConEquipoExponiendo(
+                  configActual.equipoExponiendo,
+                );
+              }, 100);
+            }
+          }
+        });
+        // ========== FIN MODIFICACIÓN ==========
+
+        if (unsubConfig) unsubConfig();
+
+        unsubConfig = onSnapshot(
+          doc(db, "clases", window.claseActiva),
+          (snap) => {
+            if (!snap.exists()) return;
+
+            configActual = snap.data();
+            console.log("Config actualizada:", configActual);
+
+            // ========== NUEVO: Abrir el panel automáticamente si hay votación activa ==========
+            if (configActual.equipoExponiendo) {
+              // Verificar si el panel está cerrado y abrirlo
+              const panelEvaluacion = document.getElementById(
+                "sistema-evaluacion-body",
+              );
+              const iconoTriangulo = document.getElementById("triangulo-icon");
+
+              if (
+                panelEvaluacion &&
+                panelEvaluacion.classList.contains("hidden")
+              ) {
+                panelEvaluacion.classList.remove("hidden");
+                if (iconoTriangulo) {
+                  iconoTriangulo.classList.remove("rotate-180");
+                }
+              }
+            }
+            // fin nuevo
+            // Sincronizar el selector con el equipo que está exponiendo
+            if (configActual.equipoExponiendo) {
+              sincronizarSelectorConEquipoExponiendo(
+                configActual.equipoExponiendo,
+              );
+            }
+
+            const btnP = document.getElementById("btn-master-switch");
+            const btnR = document.getElementById("btn-lock-registro");
+
+            /* COLA */
+            btnP.innerText = configActual.colaAbierta
+              ? "🟢 PARTICIPACION ABIERTA"
+              : "🔴 PARTICIPACION CERRADA";
+
+            btnP.className = `py-4 rounded-xl font-semibold text-white text-[10px] ${
+              configActual.colaAbierta ? "bg-green-600" : "bg-red-600"
+            }`;
+
+            /* REGISTRO */
+            btnR.innerText = configActual.registroAbierto
+              ? "🔓 REGISTRO ABIERTO"
+              : "🔒 REGISTRO CERRADO";
+
+            btnR.className = `py-4 rounded-xl font-semibold text-[10px] ${
+              configActual.registroAbierto
+                ? "border-green-900 text-green-600 bg-green-200"
+                : "border-red-100 text-red-600 bg-red-200"
+            }`;
+
+            /* BLOQUEOS DURANTE VOTACIÓN */
+            const estaVotando = !!configActual.equipoExponiendo;
+
+            document.getElementById("prof-equipo-expo").disabled = estaVotando;
+            document.getElementById("filtro-horario").disabled = estaVotando;
+
+            const btnResetActual = document.querySelector(
+              'button[onclick="resetVotacionActual()"]',
+            );
+            const btnResetTodos = document.querySelector(
+              'button[onclick="resetTodasVotaciones()"]',
+            );
+
+            if (btnResetActual) btnResetActual.disabled = estaVotando;
+            if (btnResetTodos) btnResetTodos.disabled = estaVotando;
+
+            [btnResetActual, btnResetTodos].forEach((btn) => {
+              if (btn) btn.style.opacity = estaVotando ? "0.5" : "1";
+            });
+
+            /* PANEL DE VOTACIÓN */
+            if (configActual.equipoExponiendo) {
+              document
+                .getElementById("stats-votacion")
+                .classList.remove("hidden");
+
+              // Obtener el horario de la clase actual
+              const claseData = snap.data();
+              const horario = claseData.horario;
+
+              escucharVotosRealtime(horario, configActual.equipoExponiendo);
+            } else {
+              document.getElementById("stats-votacion").classList.add("hidden");
+            }
+          },
+        );
+
+        if (unsubNotas) unsubNotas();
+
+        if (!window.claseActiva) return;
+
+        unsubNotas = onSnapshot(
+          query(
+            collection(db, "clases", window.claseActiva, "estudiantes"),
+            orderBy("equipo", "asc"),
+          ),
+          (snap) => {
+            document.getElementById("total-registrados").innerText = snap.size;
+            const divTabla = document.getElementById("tabla-notas");
+            divTabla.innerHTML = "";
+            const grupos = {};
+            snap.forEach((d) => {
+              const al = { id: d.id, ...d.data() };
+              const medallas = al.medallas || {};
+              if (!grupos[al.equipo]) grupos[al.equipo] = [];
+              grupos[al.equipo].push({ ...al, medallas });
+            });
+
+            for (const nombreEquipo in grupos) {
+              const header = document.createElement("div");
+              header.className =
+                "bg-slate-100 px-4 py-1.5 text-[8px] font-black text-slate-500 uppercase border-y";
+              header.innerText = `EQUIPO: ${nombreEquipo}`;
+              divTabla.appendChild(header);
+              grupos[nombreEquipo].forEach((al) => {
+                const medallas = al.medallas || {};
+                const tp =
+                  (medallas.limon || 0) +
+                  (medallas.bronce || 0) +
+                  (medallas.plata || 0) +
+                  (medallas.oro || 0) +
+                  (medallas.diamante || 0);
+                const row = document.createElement("div");
+                row.className =
+                  "flex justify-between items-center p-3 border-b text-[10px] bg-white";
+                const nombreCompleto = al.nombre + " " + (al.apellido || "");
+                row.innerHTML = `
+            <div>
+              <div class="font-black text-slate-700">${nombreCompleto.trim()}</div>
+              <div class="text-[8px] opacity-80 font-bold mt-0.5">
+                🍋${medallas.limon || 0} 🥉${medallas.bronce || 0} 🥈${medallas.plata || 0} 🥇${medallas.oro || 0} 💎${medallas.diamante || 0}
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-right">
+                <div class="font-black text-blue-600 text-base leading-none">${tp}</div>
+                <div class="text-[7px] uppercase opacity-40 font-black">Part.</div>
+              </div>
+              <button onclick="eliminarAlumnoIndividual('${al.id}', '${al.nombre}')" class="text-slate-200 hover:text-rose-500 transition-colors text-lg">🗑️</button>
+            </div>`;
+                divTabla.appendChild(row);
+              });
+            }
+          },
+        );
+
+        if (unsubCola) unsubCola();
+        if (!window.claseActiva) return;
+
+        unsubCola = onSnapshot(
+          query(
+            collection(db, "clases", window.claseActiva, "cola"),
+            orderBy("timestamp", "asc"),
+          ),
+          (snap) => {
+            const totalActual = snap.size;
+            if (totalActual > cantidadEnColaPrevia) {
+              sonidoNotificacion
+                .play()
+                .catch((e) => console.log("Audio bloqueado"));
+            }
+            cantidadEnColaPrevia = totalActual;
+
+            const div = document.getElementById("lista-cola");
+            div.innerHTML = snap.empty
+              ? '<p class="text-center text-slate-400 py-6 text-[10px] italic">Cola de participación vacía</p>'
+              : "";
+
+            snap.forEach((d) => {
+              const al = { id: d.id, ...d.data() };
+              const med = al.medallas || {
+                limon: 0,
+                bronce: 0,
+                plata: 0,
+                oro: 0,
+                diamante: 0,
+              };
+              const item = document.createElement("div");
+              item.className = "bg-white p-3 rounded-2xl border shadow-sm mb-2";
+              const nombreCompleto = al.nombre + " " + (al.apellido || "");
+              item.innerHTML = `
+          <div class="flex justify-between mb-2">
+            <div>
+              <div class="font-black text-xs">${al.nombre}</div>
+              <div class="text-[8px] text-blue-500 font-bold uppercase">${al.equipo}</div>
+            </div>
+            <button onclick="eliminarDeCola('${al.uid}')" class="text-red-500 font-black px-2">X</button>
+          </div>
+          <div class="grid grid-cols-5 gap-1">
+            ${Object.keys(RANKS)
+              .map(
+                (k) => `
+              <button onclick="calificar('${al.uid}','${k}')" class="flex flex-col items-center py-1 rounded-xl bg-slate-50 border hover:bg-blue-600 hover:text-white transition-all">
+                <span class="text-lg">${k == "limon" ? "🍋" : k == "bronce" ? "🥉" : k == "plata" ? "🥈" : k == "oro" ? "🥇" : "💎"}</span>
+                <span class="text-[9px] font-black opacity-60">${med[k]}</span>
+              </button>`,
+              )
+              .join("")}
+          </div>`;
+              div.appendChild(item);
+            });
+          },
+        );
+      };
+
+      window.iniciarVotacion = async () => {
+        const eq = document.getElementById("prof-equipo-expo").value;
+        if (!eq) return alert("Selecciona equipo");
+        if (!window.claseActiva) return alert("Selecciona una clase primero");
+
+        console.log("Iniciando votación para equipo:", eq);
+
+        await updateDoc(doc(db, "clases", window.claseActiva), {
+          equipoExponiendo: eq,
+        });
+
+        // Guardar en localStorage
+        localStorage.setItem(
+          "votacionEnCurso",
+          JSON.stringify({
+            claseID: window.claseActiva,
+            equipo: eq,
+            timestamp: Date.now(),
+          }),
+        );
+      };
+
+      window.terminarVotacion = async () => {
+        if (!window.claseActiva) {
+          return alert("Selecciona una clase primero");
+        }
+
+        await updateDoc(doc(db, "clases", window.claseActiva), {
+          equipoExponiendo: null,
+        });
+
+        // Limpiar localStorage
+        localStorage.removeItem("votacionEnCurso");
+      };
+
+      window.terminarVotacion = async () => {
+        if (!window.claseActiva) {
+          return alert("Selecciona una clase primero");
+        }
+        await updateDoc(doc(db, "clases", window.claseActiva), {
+          equipoExponiendo: null,
+        });
+      };
+
+      function escucharVotosRealtime(h, equipo) {
+        console.log("Escuchando votaciones para:", h, equipo);
+
+        if (unsubVotos) unsubVotos();
+        unsubVotos = onSnapshot(
+          query(
+            collection(db, "votaciones"),
+            where("horario", "==", h),
+            where("equipoExpo", "==", equipo),
+          ),
+          (snap) => {
+            console.log("Votos encontrados:", snap.size);
+            console.log(
+              "Datos de votos:",
+              snap.docs.map((d) => d.data()),
+            );
+
+            const contadorVotos = document.getElementById("votos-contados");
+            if (contadorVotos) contadorVotos.innerText = snap.size;
+
+            if (snap.empty) {
+              document.getElementById("avg-total").innerText = "0.0";
+              document.getElementById("desglose-criterios").innerHTML = "";
+              return;
+            }
+
+            let sumas = {};
+            RUBRICA.forEach((c) => (sumas[c.id] = 0));
+            snap.forEach((d) => {
+              const data = d.data();
+              const votos = data.votos || {};
+
+              RUBRICA.forEach((c) => {
+                sumas[c.id] += votos[c.id] || 0;
+              });
+            });
+
+            let html = "",
+              totalGral = 0;
+            RUBRICA.forEach((c) => {
+              const avg = (sumas[c.id] / snap.size).toFixed(1);
+              totalGral += parseFloat(avg);
+              html += `<div class="flex justify-between"><span>${c.label}</span><span class="text-orange-600">${avg}</span></div>`;
+            });
+
+            document.getElementById("avg-total").innerText = (
+              totalGral / RUBRICA.length
+            ).toFixed(1);
+            document.getElementById("desglose-criterios").innerHTML = html;
+          },
+        );
+      }
+
+      //Cambiado
+      window.calificar = async (uid, k) => {
+        if (!window.claseActiva) {
+          alert("No hay clase activa");
+          return;
+        }
+        const r = RANKS[k];
+        // actualizar medallas del estudiante
+        await updateDoc(
+          doc(db, "clases", window.claseActiva, "estudiantes", uid),
+          {
+            puntos: increment(r.pts),
+            [`medallas.${k}`]: increment(1),
+          },
+        );
+        // eliminar de la cola
+        await deleteDoc(doc(db, "clases", window.claseActiva, "cola", uid));
+      };
+      //cambiado fin
+
+      //cambiado
+      window.eliminarAlumnoIndividual = async (uid, nombre) => {
+        if (!window.claseActiva) {
+          alert("No hay clase activa");
+          return;
+        }
+        if (confirm(`¿Borrar a ${nombre}?`)) {
+          // eliminar alumno de la clase
+          await deleteDoc(
+            doc(db, "clases", window.claseActiva, "estudiantes", uid),
+          );
+          // eliminar si estaba en la cola
+          await deleteDoc(doc(db, "clases", window.claseActiva, "cola", uid));
+        }
+      };
+      //cambiado fin
+
+      //cola
+      window.toggleParticipacion = async () => {
+        if (!window.claseActiva) {
+          alert("Selecciona una clase primero");
+          return;
+        }
+        try {
+          const ref = doc(db, "clases", window.claseActiva);
+          const snap = await getDoc(ref);
+          const actual = snap.data()?.colaAbierta || false;
+          await updateDoc(ref, {
+            colaAbierta: !actual,
+          });
+        } catch (err) {
+          console.error("Error cambiando estado de cola:", err);
+        }
+      };
+      //cola fin
+
+      window.toggleRegistroBloqueado = async () => {
+        if (!window.claseActiva) {
+          return alert("Selecciona una clase primero");
+        }
+        await updateDoc(doc(db, "clases", window.claseActiva), {
+          registroAbierto: !configActual.registroAbierto,
+        });
+      };
+
+      //cambiado
+      window.eliminarDeCola = async (uid) => {
+        if (!window.claseActiva) {
+          alert("No hay clase activa seleccionada");
+          return;
+        }
+        await deleteDoc(doc(db, "clases", window.claseActiva, "cola", uid));
+      };
+      //cambiado fin
+
+      window.limpiarCola = async () => {
+        if (!window.claseActiva) {
+          alert("Primero selecciona una clase");
+          return;
+        }
+
+        // Verificar si hay alumnos en la cola
+        const colaRef = collection(db, "clases", window.claseActiva, "cola");
+        const colaSnap = await getDocs(colaRef);
+
+        if (colaSnap.empty) {
+          alert("La cola de participación ya está vacía");
+          return;
+        }
+
+        // Mostrar confirmación con el número de alumnos
+        const cantidadAlumnos = colaSnap.size;
+        const confirmar = confirm(
+          `⚠️ ¿Estás seguro de vaciar la cola de participación?\n\n` +
+            `Hay ${cantidadAlumnos} alumno(s) esperando en la cola.\n` +
+            `Esta acción eliminará a todos de la fila y NO se puede deshacer.\n\n` +
+            `¿Deseas continuar?`,
+        );
+
+        if (!confirmar) return;
+
+        try {
+          // Mostrar notificación de carga
+          mostrarNotificacion("⏳", "Eliminando cola...");
+
+          // Eliminar todos los documentos de la cola
+          const batch = writeBatch(db);
+          colaSnap.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+
+          mostrarNotificacion(
+            "🗑️",
+            `Cola vaciada correctamente (${cantidadAlumnos} alumnos eliminados)`,
+          );
+        } catch (error) {
+          console.error("Error al vaciar cola:", error);
+          alert("Error al vaciar la cola. Por favor, intenta de nuevo.");
+        }
+      };
+
+      window.resetVotacionActual = async () => {
+        if (!window.claseActiva) {
+          alert("Primero selecciona una clase");
+          return;
+        }
+
+        const eq = document.getElementById("prof-equipo-expo").value;
+        if (!eq) {
+          return alert(
+            "Por favor, selecciona un equipo en el listado para resetear sus votos.",
+          );
+        }
+
+        // Obtener el horario de la clase actual
+        const claseRef = doc(db, "clases", window.claseActiva);
+        const claseSnap = await getDoc(claseRef);
+
+        if (!claseSnap.exists()) {
+          alert("La clase no existe");
+          return;
+        }
+
+        const clase = claseSnap.data();
+        const horario = clase.horario;
+
+        console.log("Resetear votos para horario:", horario, "equipo:", eq);
+
+        if (
+          !confirm(
+            `¿Reiniciar votación para el equipo "${eq}"? Los alumnos podrán votar de nuevo.`,
+          )
+        ) {
+          return;
+        }
+
+        try {
+          // Buscar todos los votos para este horario y equipo
+          const q = query(
+            collection(db, "votaciones"),
+            where("horario", "==", horario),
+            where("equipoExpo", "==", eq),
+          );
+
+          const querySnapshot = await getDocs(q);
+
+          if (querySnapshot.empty) {
+            alert("No hay votos registrados para este equipo.");
+            return;
+          }
+
+          console.log("Votos encontrados para eliminar:", querySnapshot.size);
+
+          // Eliminar todos los votos encontrados
+          const batch = writeBatch(db);
+          querySnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+
+          // Si el equipo actual es el que está exponiendo, resetear los contadores en pantalla
+          if (eq === configActual.equipoExponiendo) {
+            document.getElementById("avg-total").innerText = "0.0";
+            document.getElementById("desglose-criterios").innerHTML = "";
+            document.getElementById("votos-contados").innerText = "0";
+          }
+
+          mostrarNotificacion(
+            "🗑️",
+            `Votos del equipo "${eq}" eliminados correctamente (${querySnapshot.size} votos)`,
+          );
+        } catch (error) {
+          console.error("Error al resetear votos:", error);
+          alert("Hubo un error al intentar borrar los votos: " + error.message);
+        }
+      };
+
+      window.resetTodasVotaciones = async () => {
+        if (!window.claseActiva) {
+          return alert("Selecciona una clase primero");
+        }
+
+        // Obtener el horario de la clase actual
+        const claseRef = doc(db, "clases", window.claseActiva);
+        const claseSnap = await getDoc(claseRef);
+
+        if (!claseSnap.exists()) {
+          alert("La clase no existe");
+          return;
+        }
+
+        const clase = claseSnap.data();
+        const horario = clase.horario;
+        const materia = clase.materia || "Sin materia";
+
+        console.log("Resetear TODOS los votos para horario:", horario);
+
+        if (
+          !confirm(
+            `⚠️ ¿BORRAR TODAS las votaciones de la clase "${materia}" (${horario})?\n\nEsta acción eliminará TODOS los votos registrados y NO se puede deshacer.`,
+          )
+        ) {
+          return;
+        }
+
+        try {
+          // Buscar todos los votos para este horario (NO por claseID)
+          const q = query(
+            collection(db, "votaciones"),
+            where("horario", "==", horario),
+          );
+
+          const querySnapshot = await getDocs(q);
+
+          if (querySnapshot.empty) {
+            alert("No hay votos registrados para este horario.");
+            return;
+          }
+
+          console.log("Votos encontrados para eliminar:", querySnapshot.size);
+
+          // Eliminar todos los votos encontrados usando batch
+          const batch = writeBatch(db);
+          querySnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+
+          // También resetear el equipo exponiendo en la clase
+          await updateDoc(claseRef, {
+            equipoExponiendo: null,
+          });
+
+          // Limpiar la interfaz
+          document.getElementById("avg-total").innerText = "0.0";
+          document.getElementById("desglose-criterios").innerHTML = "";
+          document.getElementById("votos-contados").innerText = "0";
+          document.getElementById("stats-votacion").classList.add("hidden");
+
+          // Limpiar el selector de equipo expositor
+          const selExpo = document.getElementById("prof-equipo-expo");
+          if (selExpo) {
+            selExpo.value = "";
+          }
+
+          mostrarNotificacion(
+            "🗑️",
+            `Todas las votaciones del horario ${horario} han sido eliminadas (${querySnapshot.size} votos)`,
+          );
+        } catch (error) {
+          console.error("Error al resetear todas las votaciones:", error);
+          alert("Hubo un error al intentar borrar los votos: " + error.message);
+        }
+      };
+
+      window.exportarVotacionesCSV = async () => {
+        if (!window.claseActiva) {
+          alert("Primero selecciona una clase");
+          return;
+        }
+
+        // Obtener el horario de la clase seleccionada
+        const claseRef = doc(db, "clases", window.claseActiva);
+        const claseSnap = await getDoc(claseRef);
+
+        if (!claseSnap.exists()) {
+          alert("La clase no existe");
+          return;
+        }
+
+        const clase = claseSnap.data();
+        const horario = clase.horario;
+        const materia = clase.materia || "SinMateria";
+
+        console.log("Exportando votaciones para horario:", horario);
+
+        // Obtener estudiantes para mapear nombres
+        const qEstudiantes = await getDocs(
+          collection(db, "clases", window.claseActiva, "estudiantes"),
+        );
+
+        const mapaEstudiantes = {};
+        qEstudiantes.forEach((doc) => {
+          const data = doc.data();
+          mapaEstudiantes[doc.id] = {
+            nombre: data.nombre || "Sin nombre",
+            apellido: data.apellido || "",
+            equipo: data.equipo || "Sin equipo",
+          };
+        });
+
+        // Obtener votaciones
+        const qVotos = await getDocs(
+          query(
+            collection(db, "votaciones"),
+            where("horario", "==", horario),
+            orderBy("equipoExpo", "asc"),
+          ),
+        );
+
+        if (qVotos.empty) {
+          alert("No hay datos de votación para exportar.");
+          return;
+        }
+
+        const reporteResumen = {};
+        let csv = "\uFEFF";
+        csv += `REPORTE DE VOTACIONES\n`;
+        csv += `CLASE: ${materia} (${horario})\n`;
+        csv += `FECHA EXPORTACIÓN: ${new Date().toLocaleString()}\n`;
+        csv += `TOTAL VOTOS: ${qVotos.size}\n\n`;
+        csv += `DETALLE DE VOTOS\n`;
+        csv +=
+          "Equipo Evaluado,Nombre del Alumno (Votante),Apellido,Equipo del Alumno,DOMINIO (1-5),ORDEN (1-5),CALIDAD (1-5),ENTENDIMIENTO (1-5),TIEMPO (1-5),COMENTARIO/SUGERENCIA\n";
+
+        qVotos.forEach((doc) => {
+          const d = doc.data();
+          const v = d.votos || {};
+          const eqExpo = d.equipoExpo;
+          const infoVotante = mapaEstudiantes[d.voterUid] || {
+            nombre: "Anónimo",
+            apellido: "",
+            equipo: "N/A",
+          };
+
+          csv += `"${eqExpo}","${infoVotante.nombre}","${infoVotante.apellido}","${infoVotante.equipo}",${v.dominio || 0},${v.org || 0},${v.calidad || 0},${v.comunicacion || 0},${v.tiempo || 0},"${(d.sugerencia || "").replace(/"/g, '""')}"\n`;
+
+          if (!reporteResumen[eqExpo]) {
+            reporteResumen[eqExpo] = {
+              votos: 0,
+              dominio: 0,
+              org: 0,
+              calidad: 0,
+              comunicacion: 0,
+              tiempo: 0,
+            };
+          }
+          reporteResumen[eqExpo].votos++;
+          reporteResumen[eqExpo].dominio += v.dominio || 0;
+          reporteResumen[eqExpo].org += v.org || 0;
+          reporteResumen[eqExpo].calidad += v.calidad || 0;
+          reporteResumen[eqExpo].comunicacion += v.comunicacion || 0;
+          reporteResumen[eqExpo].tiempo += v.tiempo || 0;
+        });
+
+        csv += "\n\nRESUMEN DE PROMEDIOS POR EQUIPO\n";
+        csv +=
+          "Equipo,Total Votos,DOMINIO,ORDEN,CALIDAD,ENTENDIMIENTO,TIEMPO,PROMEDIO GRAL\n";
+
+        for (const eq in reporteResumen) {
+          const r = reporteResumen[eq];
+          const n = r.votos;
+          const pDom = (r.dominio / n).toFixed(2);
+          const pOrg = (r.org / n).toFixed(2);
+          const pCal = (r.calidad / n).toFixed(2);
+          const pCom = (r.comunicacion / n).toFixed(2);
+          const pTie = (r.tiempo / n).toFixed(2);
+          const promedioGral = (
+            (parseFloat(pDom) +
+              parseFloat(pOrg) +
+              parseFloat(pCal) +
+              parseFloat(pCom) +
+              parseFloat(pTie)) /
+            5
+          ).toFixed(2);
+          csv += `"${eq}",${n},${pDom},${pOrg},${pCal},${pCom},${pTie},${promedioGral}\n`;
+        }
+
+        const link = document.createElement("a");
+        const fecha = new Date().toISOString().slice(0, 10);
+        const nombreArchivo = `Votaciones_${materia.replace(/[^a-zA-Z0-9áéíóúñÑ]/g, "_")}_${horario}`;
+        link.href = URL.createObjectURL(
+          new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+        );
+        link.download = `${nombreArchivo}_${fecha}.csv`;
+        link.click();
+
+        mostrarNotificacion(
+          "📊",
+          `Archivo "${nombreArchivo}_${fecha}.csv" generado`,
+        );
+      };
+
+      window.reiniciarMedallasPorGrupo = async () => {
+        const h = document.getElementById("filtro-horario").value;
+        if (
+          confirm(
+            `¿Estás seguro de REINICIAR A CERO las medallas y puntos de TODOS los alumnos del grupo ${h}?`,
+          )
+        ) {
+          try {
+            const q = await getDocs(
+              collection(db, "clases", window.claseActiva, "estudiantes"),
+            );
+            if (q.empty) return alert("No hay alumnos en este grupo.");
+            const batch = writeBatch(db);
+            q.forEach((d) => {
+              batch.update(d.ref, {
+                puntos: 0,
+                rLimon: 0,
+                rBronce: 0,
+                rPlata: 0,
+                rOro: 0,
+                rDiamante: 0,
+              });
+            });
+            await batch.commit();
+            alert(
+              `¡Ciclo reiniciado! Todos los alumnos del grupo ${h} ahora tienen 0 medallas.`,
+            );
+          } catch (error) {
+            console.error("Error al reiniciar medallas:", error);
+          }
+        }
+      };
+
+      window.exportarMedallasCSV = async () => {
+        if (!window.claseActiva) {
+          alert("Primero selecciona una clase");
+          return;
+        }
+
+        try {
+          // Obtener los datos de la clase para el nombre del archivo
+          const claseRef = doc(db, "clases", window.claseActiva);
+          const claseSnap = await getDoc(claseRef);
+
+          let materia = "SinMateria";
+          let horario = "SinHorario";
+
+          if (claseSnap.exists()) {
+            const clase = claseSnap.data();
+            materia = clase.materia || "SinMateria";
+            horario = clase.horario || "SinHorario";
+          }
+
+          // Limpiar caracteres especiales para el nombre del archivo
+          const materiaLimpia = materia.replace(/[^a-zA-Z0-9áéíóúñÑ]/g, "_");
+          const horarioLimpio = horario.replace(/[^a-zA-Z0-9]/g, "_");
+
+          const nombreArchivo = `Datos_Participacion_${materiaLimpia}_${horarioLimpio}`;
+
+          const q = await getDocs(
+            query(
+              collection(db, "clases", window.claseActiva, "estudiantes"),
+              orderBy("nombre", "asc"),
+            ),
+          );
+
+          if (q.empty) {
+            alert("No hay alumnos registrados en esta clase.");
+            return;
+          }
+
+          let csv = "\uFEFF";
+
+          // Agregar información de la clase en el encabezado
+          csv += `CLASE: ${materia} (${horario})\n`;
+          csv += `FECHA EXPORTACIÓN: ${new Date().toLocaleString()}\n`;
+          csv += `TOTAL ALUMNOS: ${q.size}\n\n`;
+
+          csv +=
+            "Nombre,Apellido,Equipo,🍋 Limones,🥉 Bronces,🥈 Platas,🥇 Oros,💎 Diamantes,Participaciones\n";
+
+          q.forEach((docu) => {
+            const al = docu.data();
+            const m = al.medallas || {};
+
+            const limon = m.limon || 0;
+            const bronce = m.bronce || 0;
+            const plata = m.plata || 0;
+            const oro = m.oro || 0;
+            const diamante = m.diamante || 0;
+            const total = limon + bronce + plata + oro + diamante;
+
+            csv += `${al.nombre},${al.apellido},${al.equipo},${limon},${bronce},${plata},${oro},${diamante},${total}\n`;
+          });
+
+          const link = document.createElement("a");
+          const fecha = new Date().toISOString().slice(0, 10);
+          link.href = URL.createObjectURL(
+            new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+          );
+          link.download = `${nombreArchivo}_${fecha}.csv`;
+          link.click();
+
+          mostrarNotificacion(
+            "📊",
+            `Archivo "${nombreArchivo}_${fecha}.csv" generado`,
+          );
+        } catch (error) {
+          console.error("Error al exportar:", error);
+          alert("Error al exportar los datos");
+        }
+      };
+
+      //Agregado
+      window.crearClase = async () => {
+        const horario = document.getElementById("crear-horario").value;
+        const materia = document.getElementById("crear-materia").value.trim();
+
+        if (!horario || !materia) {
+          alert("Debe indicar horario y materia");
+          return;
+        }
+
+        try {
+          // Verificar si ya existe una clase con el mismo horario para este profesor
+          const q = query(
+            collection(db, "clases"),
+            where("profesorID", "==", auth.currentUser.uid),
+            where("horario", "==", horario),
+          );
+
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            // Mostrar las clases existentes en ese horario
+            let mensaje = `Ya tienes una clase en el horario ${horario}:\n\n`;
+            querySnapshot.forEach((doc) => {
+              const clase = doc.data();
+              mensaje += `📚 ${clase.materia}\n`;
+            });
+            mensaje += `\nNo puedes tener dos clases en el mismo horario.`;
+            alert(mensaje);
+            return;
+          }
+
+          // Crear un ID único para la clase
+          const claseID =
+            auth.currentUser.uid + "_" + horario + "_" + Date.now();
+
+          const ref = doc(db, "clases", claseID);
+
+          await setDoc(ref, {
+            profesorID: auth.currentUser.uid,
+            profesorEmail: auth.currentUser.email,
+            profesorNombre: window.profesorNombre,
+            horario: horario,
+            materia: materia,
+            registroAbierto: false,
+            colaAbierta: false,
+            equipoExponiendo: null,
+            fechaCreacion: serverTimestamp(),
+          });
+
+          // Limpiar inputs
+          document.getElementById("crear-materia").value = "";
+          document.getElementById("crear-horario").value = "";
+
+          mostrarNotificacion(
+            "✅",
+            `Clase "${materia}" (${horario}) creada correctamente`,
+          );
+        } catch (e) {
+          console.error("Error creando clase", e);
+          alert("Error al crear la clase. Por favor, intenta de nuevo.");
+        }
+      };
+      //agregado fin
+
+      // Función para editar una clase
+      window.editarClase = async function (
+        claseId,
+        nombreActual,
+        horarioActual,
+      ) {
+        const nuevoNombre = prompt(
+          "Editar nombre de la materia:",
+          nombreActual,
+        );
+        if (!nuevoNombre || nuevoNombre === nombreActual) return;
+
+        if (nuevoNombre.trim() === "") {
+          alert("El nombre de la materia no puede estar vacío");
+          return;
+        }
+
+        const cambiarHorario = confirm("¿Deseas cambiar también el horario?");
+        let nuevoHorario = horarioActual;
+
+        if (cambiarHorario) {
+          const horarios = ["SA", "A", "SB", "B", "SC", "C", "SD", "D"];
+          nuevoHorario = prompt(
+            `Ingresa el nuevo horario (${horarios.join(", ")}):`,
+            horarioActual,
+          );
+
+          if (!nuevoHorario) return;
+          nuevoHorario = nuevoHorario.toUpperCase().trim();
+
+          if (!horarios.includes(nuevoHorario)) {
+            alert(`Horario no válido. Debe ser uno de: ${horarios.join(", ")}`);
+            return;
+          }
+
+          // Verificar que no exista otra clase en el nuevo horario
+          try {
+            const q = query(
+              collection(db, "clases"),
+              where("profesorID", "==", auth.currentUser.uid),
+              where("horario", "==", nuevoHorario),
+            );
+            const querySnapshot = await getDocs(q);
+
+            // Si existe una clase en ese horario y no es la misma que estamos editando
+            if (!querySnapshot.empty) {
+              let otraClase = false;
+              querySnapshot.forEach((doc) => {
+                if (doc.id !== claseId) {
+                  otraClase = true;
+                }
+              });
+
+              if (otraClase) {
+                alert(
+                  `Ya tienes una clase en el horario ${nuevoHorario}. No puedes tener dos clases en el mismo horario.`,
+                );
+                return;
+              }
+            }
+          } catch (error) {
+            console.error("Error verificando horario:", error);
+            alert("Error al verificar disponibilidad del horario");
+            return;
+          }
+        }
+
+        try {
+          const claseRef = doc(db, "clases", claseId);
+          const updates = { materia: nuevoNombre };
+
+          if (cambiarHorario && nuevoHorario !== horarioActual) {
+            updates.horario = nuevoHorario;
+          }
+
+          await updateDoc(claseRef, updates);
+          mostrarNotificacion("✏️", `Clase actualizada a "${nuevoNombre}"`);
+        } catch (error) {
+          console.error("Error al editar clase:", error);
+          alert("Error al editar la clase. Por favor, intenta de nuevo.");
+        }
+      };
+
+      // Función para eliminar una clase
+      window.eliminarClase = async function (claseId, nombreClase) {
+        const confirmar = confirm(
+          `¿Estás seguro de eliminar la clase "${nombreClase}"?\n\n` +
+            `Esta acción eliminará TODOS los datos asociados:\n` +
+            `- Todos los estudiantes registrados\n` +
+            `- Todas las votaciones\n` +
+            `- Todos los grupos creados\n` +
+            `- La cola de participación\n\n` +
+            `Esta acción NO se puede deshacer.`,
+        );
+
+        if (!confirmar) return;
+
+        try {
+          // Mostrar indicador de carga
+          mostrarNotificacion("⏳", "Eliminando clase...");
+
+          // Obtener el horario de la clase para eliminar votaciones
+          const claseRef = doc(db, "clases", claseId);
+          const claseSnap = await getDoc(claseRef);
+          let horario = null;
+
+          if (claseSnap.exists()) {
+            horario = claseSnap.data().horario;
+          }
+
+          // 1. Eliminar todos los estudiantes
+          const estudiantesSnap = await getDocs(
+            collection(db, "clases", claseId, "estudiantes"),
+          );
+          const batchEstudiantes = writeBatch(db);
+          estudiantesSnap.forEach((doc) => {
+            batchEstudiantes.delete(doc.ref);
+          });
+          await batchEstudiantes.commit();
+
+          // 2. Eliminar todos los grupos
+          const gruposSnap = await getDocs(
+            collection(db, "clases", claseId, "grupos"),
+          );
+          const batchGrupos = writeBatch(db);
+          gruposSnap.forEach((doc) => {
+            batchGrupos.delete(doc.ref);
+          });
+          await batchGrupos.commit();
+
+          // 3. Eliminar la cola
+          const colaSnap = await getDocs(
+            collection(db, "clases", claseId, "cola"),
+          );
+          const batchCola = writeBatch(db);
+          colaSnap.forEach((doc) => {
+            batchCola.delete(doc.ref);
+          });
+          await batchCola.commit();
+
+          // 4. Eliminar las votaciones asociadas a esta clase (por horario)
+          if (horario) {
+            console.log("Eliminando votaciones para horario:", horario);
+            const votacionesSnap = await getDocs(
+              query(
+                collection(db, "votaciones"),
+                where("horario", "==", horario),
+              ),
+            );
+            const batchVotaciones = writeBatch(db);
+            votacionesSnap.forEach((doc) => {
+              batchVotaciones.delete(doc.ref);
+            });
+            await batchVotaciones.commit();
+            console.log(`Votaciones eliminadas: ${votacionesSnap.size}`);
+          }
+
+          // 5. Eliminar la clase
+          await deleteDoc(doc(db, "clases", claseId));
+
+          // 6. Limpiar selección si era la clase activa
+          const selector = document.getElementById("filtro-horario");
+          if (selector.value === claseId) {
+            selector.value = "";
+            localStorage.removeItem("ultimaClaseSeleccionada");
+            localStorage.removeItem("votacionEnCurso");
+            window.claseActiva = null;
+
+            // Ocultar paneles que dependen de la clase
+            const statsVotacion = document.getElementById("stats-votacion");
+            if (statsVotacion) statsVotacion.classList.add("hidden");
+
+            const listaCola = document.getElementById("lista-cola");
+            if (listaCola) listaCola.innerHTML = "";
+
+            const tablaNotas = document.getElementById("tabla-notas");
+            if (tablaNotas) tablaNotas.innerHTML = "";
+
+            const totalRegistrados =
+              document.getElementById("total-registrados");
+            if (totalRegistrados) totalRegistrados.innerText = "0";
+
+            // Limpiar selector de grupos
+            const listaGrupos = document.getElementById("lista-grupos");
+            if (listaGrupos) {
+              listaGrupos.innerHTML = `
+          <div class="text-center text-gray-500 py-4">
+            Selecciona una clase para ver sus grupos
+          </div>
+        `;
+            }
+          }
+
+          mostrarNotificacion(
+            "🗑️",
+            `Clase "${nombreClase}" eliminada correctamente`,
+          );
+        } catch (error) {
+          console.error("Error al eliminar clase:", error);
+          alert("Error al eliminar la clase. Por favor, intenta de nuevo.");
+        }
+      };
+
+      //agregado
+      //agregado
+      function escucharClasesProfesor() {
+        const q = query(
+          collection(db, "clases"),
+          where("profesorID", "==", auth.currentUser.uid),
+        );
+        onSnapshot(q, (snap) => {
+          const contenedor = document.getElementById("lista-clases");
+          const selector = document.getElementById("filtro-horario");
+          contenedor.innerHTML = "";
+
+          // Guardar el valor actual antes de limpiar
+          const valorActual = selector.value;
+
+          selector.innerHTML = `<option value="">Seleccionar clase</option>`;
+
+          if (snap.empty) {
+            contenedor.innerHTML = `
+        <div class="text-xs opacity-40 py-3">
+          No has creado clases aún
+        </div>`;
+            return;
+          }
+
+          snap.forEach((docu) => {
+            const clase = docu.data();
+            const claseId = docu.id;
+
+            const item = document.createElement("div");
+            item.className =
+              "flex items-center justify-between py-2 px-2 hover:bg-slate-700 rounded border-b border-slate-700 last:border-0";
+            item.innerHTML = `
+        <div class="flex flex-col flex-1">
+          <span class="text-white text-sm font-medium">${escapeHtml(clase.horario)} - ${escapeHtml(clase.materia)}</span>
+          <span class="text-slate-400 text-[9px]">Creada: ${clase.fechaCreacion ? new Date(clase.fechaCreacion.toDate()).toLocaleDateString() : "Reciente"}</span>
+        </div>
+        <div class="flex gap-2">
+          <button 
+            onclick="editarClase('${claseId}', '${escapeHtml(clase.materia)}', '${clase.horario}')"
+            class="text-blue-400 hover:text-blue-300 text-sm px-2 py-1 rounded hover:bg-slate-600"
+            title="Editar clase"
+          >
+            ✏️
+          </button>
+          <button 
+            onclick="eliminarClase('${claseId}', '${escapeHtml(clase.horario)} - ${escapeHtml(clase.materia)}')"
+            class="text-red-400 hover:text-red-300 text-sm px-2 py-1 rounded hover:bg-slate-600"
+            title="Eliminar clase"
+          >
+            🗑️
+          </button>
+        </div>
+      `;
+            contenedor.appendChild(item);
+
+            const op = document.createElement("option");
+            op.value = claseId;
+            op.textContent = `${clase.horario} - ${clase.materia}`;
+            selector.appendChild(op);
+          });
+
+          // Restaurar la clase seleccionada
+          const claseGuardada = localStorage.getItem("ultimaClaseSeleccionada");
+          if (claseGuardada) {
+            let existe = false;
+            for (let i = 0; i < selector.options.length; i++) {
+              if (selector.options[i].value === claseGuardada) {
+                selector.value = claseGuardada;
+                existe = true;
+                break;
+              }
+            }
+            if (!existe && valorActual && valorActual !== "") {
+              for (let i = 0; i < selector.options.length; i++) {
+                if (selector.options[i].value === valorActual) {
+                  selector.value = valorActual;
+                  existe = true;
+                  break;
+                }
+              }
+            }
+            if (existe && selector.value !== window.claseActiva) {
+              window.actualizarTodoProfesor();
+              // ========== NUEVO: Forzar la carga de grupos ==========
+              cargarGruposDeClase(selector.value);
+              // ========== FIN NUEVO ==========
+            }
+          }
+        });
+      }
+
+      //agregado fin
+      //agregado
+      window.abrirRegistro = async (claseID) => {
+        const ref = doc(db, "clases", claseID);
+        const snap = await getDoc(ref);
+        const estado = snap.data().registroAbierto;
+        await updateDoc(ref, {
+          registroAbierto: !estado,
+        });
+      };
+      //agregado fin
+      //agregado
+
+      window.login = async () => {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+          console.log("Usuario:", user.email);
+        } catch (err) {
+          console.error("Error login:", err);
+        }
+      };
+      window.seleccionarClase = function (id) {
+        window.claseActiva = id;
+        console.log("Clase activa:", id);
+        actualizarTodoProfesor();
+      };
+
+      window.seleccionarClaseDesdeSelector = function () {
+        const id = document.getElementById("filtro-horario").value;
+        if (!id) return;
+        window.claseActiva = id;
+        actualizarTodoProfesor();
+      };
+      //agregado fin
+      //agregado para grupo
+      // Función para crear un nuevo grupo en la clase seleccionada
+      window.crearGrupo = async function () {
+        try {
+          // 1. Verificar que el profesor esté autenticado
+          const user = auth.currentUser;
+          if (!user) {
+            alert("Debes iniciar sesión como profesor");
+            return;
+          }
+
+          // 2. Obtener la clase seleccionada
+          const claseSeleccionada =
+            document.getElementById("filtro-horario").value;
+          if (!claseSeleccionada) {
+            alert("Por favor, selecciona una clase primero");
+            return;
+          }
+
+          // 3. Obtener el nombre del nuevo grupo
+          const nombreGrupo = document
+            .getElementById("nuevoGrupo")
+            .value.trim();
+          if (!nombreGrupo) {
+            alert("Por favor, ingresa un nombre para el grupo");
+            return;
+          }
+
+          // 4. Verificar que no exista un grupo con el mismo nombre en esta clase
+          const gruposRef = collection(
+            db,
+            "clases",
+            claseSeleccionada,
+            "grupos",
+          );
+          const q = query(gruposRef, where("nombre", "==", nombreGrupo));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            alert("Ya existe un grupo con ese nombre en esta clase");
+            return;
+          }
+
+          // 5. Crear el nuevo grupo en Firestore
+          const nuevoGrupoRef = doc(gruposRef);
+          await setDoc(nuevoGrupoRef, {
+            nombre: nombreGrupo,
+            fechaCreacion: serverTimestamp(),
+            creadoPor: user.uid,
+            profesorNombre: user.displayName || user.email,
+            miembros: [], // Inicialmente vacío
+          });
+
+          // 6. Limpiar el input
+          document.getElementById("nuevoGrupo").value = "";
+
+          // 7. Mostrar notificación de éxito
+          mostrarNotificacion(
+            "✅",
+            `Grupo "${nombreGrupo}" creado exitosamente`,
+          );
+
+          // 8. Recargar la lista de grupos
+          cargarGruposDeClase(claseSeleccionada);
+        } catch (error) {
+          console.error("Error al crear grupo:", error);
+          alert("Error al crear el grupo. Por favor, intenta de nuevo.");
+        }
+      };
+
+      // Función para cargar los grupos de una clase específica
+      async function cargarGruposDeClase(claseID) {
+        if (!claseID) return;
+
+        try {
+          const gruposRef = collection(db, "clases", claseID, "grupos");
+          const qGrupos = query(gruposRef, orderBy("nombre", "asc"));
+
+          // También obtener los estudiantes para contar miembros
+          const estudiantesRef = collection(
+            db,
+            "clases",
+            claseID,
+            "estudiantes",
+          );
+
+          // Usar onSnapshot para escuchar cambios en tiempo real
+          onSnapshot(qGrupos, async (snapshotGrupos) => {
+            // Obtener estudiantes en tiempo real
+            onSnapshot(estudiantesRef, (snapshotEstudiantes) => {
+              const contenedorGrupos = document.getElementById("lista-grupos");
+              if (!contenedorGrupos) return;
+
+              // Crear un mapa de conteo por grupo
+              const conteoPorGrupo = {};
+              snapshotEstudiantes.forEach((doc) => {
+                const estudiante = doc.data();
+                const equipo = estudiante.equipo;
+                if (equipo) {
+                  conteoPorGrupo[equipo] = (conteoPorGrupo[equipo] || 0) + 1;
+                }
+              });
+
+              if (snapshotGrupos.empty) {
+                contenedorGrupos.innerHTML = `
+            <div class="text-center text-gray-500 py-4">
+              No hay grupos creados en esta clase
+            </div>
+          `;
+                return;
+              }
+
+              let html = `
+          <div class="space-y-1">
+            <h3 class="text-sm font-bold mb-2 text-white">Grupos de la clase:</h3>
+        `;
+
+              snapshotGrupos.forEach((doc) => {
+                const grupo = doc.data();
+                const grupoId = doc.id;
+                const miembrosCount = conteoPorGrupo[grupo.nombre] || 0;
+
+                html += `
+            <div class="bg-yellow-100 border rounded-lg p-2 flex justify-between items-center">
+              <div class="flex-1">
+                <span class="text-[14px] text-gray-900 font-bold ml-2">${escapeHtml(grupo.nombre)}</span>
+                <span class="text-xs text-gray-500 ml-2">
+                  👥 ${miembrosCount} ${miembrosCount === 1 ? "miembro" : "miembros"}
+                </span>
+              </div>
+              <div class="flex gap-2">
+                <button 
+                  onclick="editarGrupo('${grupoId}', '${escapeHtml(grupo.nombre)}')"
+                  class="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded hover:bg-blue-100"
+                  title="Editar grupo"
+                >
+                  ✏️
+                </button>
+                <button 
+                  onclick="eliminarGrupo('${grupoId}', '${escapeHtml(grupo.nombre)}')"
+                  class="text-red-600 hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-red-100"
+                  title="Eliminar grupo"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          `;
+              });
+
+              html += `</div>`;
+              contenedorGrupos.innerHTML = html;
+            });
+          });
+        } catch (error) {
+          console.error("Error al cargar grupos:", error);
+        }
+      }
+
+      // Función para eliminar un grupo
+      window.eliminarGrupo = async function (grupoId, nombreGrupo) {
+        const confirmar = confirm(
+          `¿Estás seguro de eliminar el grupo "${nombreGrupo}"?\n\nLos alumnos asignados a este grupo quedarán sin grupo.`,
+        );
+
+        if (!confirmar) return;
+
+        try {
+          const claseSeleccionada =
+            document.getElementById("filtro-horario").value;
+          if (!claseSeleccionada) return;
+
+          // Eliminar el grupo
+          await deleteDoc(
+            doc(db, "clases", claseSeleccionada, "grupos", grupoId),
+          );
+
+          // Opcional: Actualizar los estudiantes que pertenecían a este grupo
+          // Esto los dejaría sin grupo asignado
+          const estudiantesRef = collection(
+            db,
+            "clases",
+            claseSeleccionada,
+            "estudiantes",
+          );
+          const q = query(estudiantesRef, where("equipo", "==", nombreGrupo));
+          const estudiantesSnapshot = await getDocs(q);
+
+          // Actualizar estudiantes para que no tengan grupo
+          const updates = [];
+          estudiantesSnapshot.forEach((estudianteDoc) => {
+            updates.push(
+              updateDoc(
+                doc(
+                  db,
+                  "clases",
+                  claseSeleccionada,
+                  "estudiantes",
+                  estudianteDoc.id,
+                ),
+                {
+                  equipo: "SinGrupo",
+                },
+              ),
+            );
+          });
+
+          await Promise.all(updates);
+
+          mostrarNotificacion("🗑️", `Grupo "${nombreGrupo}" eliminado`);
+        } catch (error) {
+          console.error("Error al eliminar grupo:", error);
+          alert("Error al eliminar el grupo");
+        }
+      };
+
+      // Función para editar un grupo
+      window.editarGrupo = async function (grupoId, nombreActual) {
+        const nuevoNombre = prompt(
+          "Ingresa el nuevo nombre del grupo:",
+          nombreActual,
+        );
+
+        if (!nuevoNombre || nuevoNombre === nombreActual) return;
+
+        if (nuevoNombre.trim() === "") {
+          alert("El nombre del grupo no puede estar vacío");
+          return;
+        }
+
+        try {
+          const claseSeleccionada =
+            document.getElementById("filtro-horario").value;
+          if (!claseSeleccionada) return;
+
+          // Verificar que no exista otro grupo con el mismo nombre
+          const gruposRef = collection(
+            db,
+            "clases",
+            claseSeleccionada,
+            "grupos",
+          );
+          const q = query(gruposRef, where("nombre", "==", nuevoNombre));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty && querySnapshot.docs[0].id !== grupoId) {
+            alert("Ya existe un grupo con ese nombre");
+            return;
+          }
+
+          // Actualizar el nombre del grupo
+          await updateDoc(
+            doc(db, "clases", claseSeleccionada, "grupos", grupoId),
+            {
+              nombre: nuevoNombre,
+            },
+          );
+
+          // Actualizar también el campo "equipo" en los estudiantes que pertenecían a este grupo
+          const estudiantesRef = collection(
+            db,
+            "clases",
+            claseSeleccionada,
+            "estudiantes",
+          );
+          const qEstudiantes = query(
+            estudiantesRef,
+            where("equipo", "==", nombreActual),
+          );
+          const estudiantesSnapshot = await getDocs(qEstudiantes);
+
+          const updates = [];
+          estudiantesSnapshot.forEach((estudianteDoc) => {
+            updates.push(
+              updateDoc(
+                doc(
+                  db,
+                  "clases",
+                  claseSeleccionada,
+                  "estudiantes",
+                  estudianteDoc.id,
+                ),
+                {
+                  equipo: nuevoNombre,
+                },
+              ),
+            );
+          });
+
+          await Promise.all(updates);
+
+          mostrarNotificacion("✏️", `Grupo renombrado a "${nuevoNombre}"`);
+        } catch (error) {
+          console.error("Error al editar grupo:", error);
+          alert("Error al editar el grupo");
+        }
+      };
+
+      // Función auxiliar para escapar HTML y evitar XSS
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Escuchar cambios en la selección de clase para cargar sus grupos
+      document.addEventListener("DOMContentLoaded", () => {
+        const selectorClase = document.getElementById("filtro-horario");
+        if (selectorClase) {
+          selectorClase.addEventListener("change", (e) => {
+            const claseID = e.target.value;
+            if (claseID) {
+              localStorage.setItem("ultimaClaseSeleccionada", claseID);
+              cargarGruposDeClase(claseID); // Esto ya existe
+              window.actualizarTodoProfesor();
+              setTimeout(() => restaurarEstadoVotacion(), 500);
+            } else {
+              localStorage.removeItem("ultimaClaseSeleccionada");
+              // Limpiar la lista de grupos cuando no hay clase seleccionada
+              const contenedorGrupos = document.getElementById("lista-grupos");
+              if (contenedorGrupos) {
+                contenedorGrupos.innerHTML = `
+            <div class="text-center text-gray-500 py-4">
+              Selecciona una clase para ver sus grupos
+            </div>
+          `;
+              }
+            }
+          });
+        }
+
+        // Restaurar estado de votación al cargar la página
+        setTimeout(() => restaurarEstadoVotacion(), 1500);
+      });
+
+      // Función para mostrar notificaciones (similar a la que usas en index.html)
+      function mostrarNotificacion(emoji, mensaje) {
+        // Crear el elemento de notificación si no existe
+        let notificacion = document.getElementById("notificacion-logro");
+
+        if (!notificacion) {
+          // Si no existe, crearlo dinámicamente
+          notificacion = document.createElement("div");
+          notificacion.id = "notificacion-logro";
+          notificacion.className =
+            "fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden animate-bounce";
+          notificacion.innerHTML = `
+            <div class="bg-white border-2 border-blue-500 shadow-2xl rounded-2xl px-6 py-3 flex items-center gap-3">
+                <span id="logro-emoji" class="text-3xl"></span>
+                <div>
+                    <p class="text-[10px] font-black uppercase text-blue-500">Sistema</p>
+                    <p id="logro-texto" class="font-bold text-slate-700"></p>
+                </div>
+            </div>
+        `;
+          document.body.appendChild(notificacion);
+        }
+
+        // Actualizar y mostrar la notificación
+        const emojiSpan = document.getElementById("logro-emoji");
+        const textoP = document.getElementById("logro-texto");
+
+        if (emojiSpan) emojiSpan.innerText = emoji;
+        if (textoP) textoP.innerText = mensaje;
+
+        notificacion.classList.remove("hidden");
+
+        // Ocultar después de 3 segundos
+        setTimeout(() => {
+          notificacion.classList.add("hidden");
+        }, 3000);
+      }
+      //fin agregado para grupo
+
+      //toggle panel (ejemplo para sección de votaciones, puedes usarlo para otras secciones)
+      window.togglePanel = function togglePanel(panelId, iconId) {
+        const panel = document.getElementById(panelId);
+        const icon = document.getElementById(iconId);
+
+        // Alternar visibilidad del panel
+        if (panel.classList.contains("hidden")) {
+          panel.classList.remove("hidden");
+          icon.classList.remove("rotate-180"); // Vuelve a su posición
+        } else {
+          panel.classList.add("hidden");
+          icon.classList.add("rotate-180"); // Rota 180 grados
+        }
+      };
+      //fin toggle panel
+      // Función para sincronizar el selector con el equipo que está exponiendo
+      function sincronizarSelectorConEquipoExponiendo(equipoExponiendo) {
+        const selExpo = document.getElementById("prof-equipo-expo");
+        if (!selExpo) return;
+
+        if (equipoExponiendo) {
+          // Buscar la opción en el selector
+          let encontrado = false;
+          for (let i = 0; i < selExpo.options.length; i++) {
+            if (selExpo.options[i].value === equipoExponiendo) {
+              selExpo.value = equipoExponiendo;
+              encontrado = true;
+              break;
+            }
+          }
+
+          // Si no se encuentra, intentar de nuevo después de un momento
+          if (!encontrado) {
+            setTimeout(() => {
+              for (let i = 0; i < selExpo.options.length; i++) {
+                if (selExpo.options[i].value === equipoExponiendo) {
+                  selExpo.value = equipoExponiendo;
+                  break;
+                }
+              }
+            }, 500);
+          }
+
+          // ========== NUEVO: Asegurar que el panel esté abierto ==========
+          const panelEvaluacion = document.getElementById(
+            "sistema-evaluacion-body",
+          );
+          const iconoTriangulo = document.getElementById("triangulo-icon");
+
+          if (panelEvaluacion && panelEvaluacion.classList.contains("hidden")) {
+            panelEvaluacion.classList.remove("hidden");
+            if (iconoTriangulo) {
+              iconoTriangulo.classList.remove("rotate-180");
+            }
+          }
+          // ========== FIN NUEVO ==========
+        } else {
+          selExpo.value = "";
+        }
+      }
+
+      // Función para restaurar el estado de votación desde localStorage
+      function restaurarEstadoVotacion() {
+        const claseSeleccionada =
+          document.getElementById("filtro-horario").value;
+        if (!claseSeleccionada) return;
+
+        const claseRef = doc(db, "clases", claseSeleccionada);
+        getDoc(claseRef).then((snap) => {
+          if (snap.exists() && snap.data().equipoExponiendo) {
+            const equipoExponiendo = snap.data().equipoExponiendo;
+
+            // Abrir el panel de evaluación
+            const panelEvaluacion = document.getElementById(
+              "sistema-evaluacion-body",
+            );
+            const iconoTriangulo = document.getElementById("triangulo-icon");
+
+            if (
+              panelEvaluacion &&
+              panelEvaluacion.classList.contains("hidden")
+            ) {
+              panelEvaluacion.classList.remove("hidden");
+              if (iconoTriangulo) {
+                iconoTriangulo.classList.remove("rotate-180");
+              }
+            }
+
+            setTimeout(() => {
+              sincronizarSelectorConEquipoExponiendo(equipoExponiendo);
+              if (typeof mostrarNotificacion === "function") {
+                mostrarNotificacion(
+                  "🔄",
+                  `Votación en curso para equipo "${equipoExponiendo}"`,
+                );
+              }
+            }, 500);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

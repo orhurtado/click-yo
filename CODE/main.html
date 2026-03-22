@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Click-Yo | Gestión de Profesores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>"
+    />
+  </head>
+  <body class="bg-slate-900 text-slate-100 min-h-screen">
+    <div class="max-w-2xl mx-auto p-6">
+      <header class="py-8 text-center border-b border-slate-800 mb-8">
+        <h1
+          class="text-4xl font-black text-blue-500 uppercase tracking-tighter italic"
+        >
+          Admin Maestro
+        </h1>
+        <p
+          class="text-slate-500 font-bold text-[10px] uppercase tracking-[0.3em]"
+        >
+          Gestión de Accesos click-yo
+        </p>
+      </header>
+
+      <section
+        class="bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-700 mb-8"
+      >
+        <h2
+          class="text-xs font-black uppercase text-blue-400 mb-4 tracking-widest"
+        >
+          Autorizar Profesor
+        </h2>
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              id="nombre-profesor"
+              placeholder="Nombre"
+              class="flex-1 bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+            />
+            <input
+              type="text"
+              id="apellido-profesor"
+              placeholder="Apellido"
+              class="flex-1 bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              id="email-profesor"
+              placeholder="correo@gmail.com"
+              class="flex-1 bg-slate-900 border-2 border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+            />
+            <button
+              onclick="registrarProfesor()"
+              class="bg-blue-600 hover:bg-blue-500 text-white font-black py-3 px-8 rounded-xl text-xs uppercase transition-all active:scale-95 shadow-lg shadow-blue-900/20"
+            >
+              Añadir
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="bg-slate-800 rounded-3xl overflow-hidden border border-slate-700"
+      >
+        <div
+          class="px-6 py-4 bg-slate-800/50 border-b border-slate-700 flex justify-between items-center"
+        >
+          <h2
+            class="text-[10px] font-black uppercase text-slate-400 tracking-widest text-center"
+          >
+            Profesores en el Sistema
+          </h2>
+          <div
+            id="counter"
+            class="bg-blue-900 text-blue-300 text-[10px] font-black px-2 py-1 rounded-md"
+          >
+            0
+          </div>
+        </div>
+
+        <div id="lista-profesores" class="divide-y divide-slate-700/50">
+          <div class="p-10 text-center opacity-20 italic text-sm">
+            Cargando lista...
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        onSnapshot,
+        doc,
+        setDoc,
+        updateDoc,
+        deleteDoc,
+        serverTimestamp,
+        query,
+        orderBy,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: "",
+        measurementId: "",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // FUNCIÓN: Registrar o Activar Profesor
+      window.registrarProfesor = async () => {
+        const nombre = document.getElementById("nombre-profesor").value.trim();
+        const apellido = document
+          .getElementById("apellido-profesor")
+          .value.trim();
+        const emailInput = document.getElementById("email-profesor");
+        const email = emailInput.value.trim().toLowerCase();
+
+        if (!nombre || !apellido || !email || !email.includes("@")) {
+          alert("Complete todos los datos del profesor.");
+          return;
+        }
+
+        try {
+          await setDoc(doc(db, "autorizados", email), {
+            email: email,
+            nombre: nombre,
+            apellido: apellido,
+            nombreCompleto: nombre + " " + apellido,
+            activo: true,
+            fechaRegistro: serverTimestamp(),
+          });
+
+          document.getElementById("nombre-profesor").value = "";
+          document.getElementById("apellido-profesor").value = "";
+          emailInput.value = "";
+        } catch (e) {
+          console.error("Error al registrar: ", e);
+        }
+      };
+
+      // FUNCIÓN: Alternar Estado (Activar/Desactivar)
+      window.toggleEstado = async (email, estadoActual) => {
+        const ref = doc(db, "autorizados", email);
+        await updateDoc(ref, { activo: !estadoActual });
+      };
+
+      // FUNCIÓN: Eliminar Profesor
+      window.eliminarProfesor = async (email) => {
+        if (confirm(`¿Eliminar permanentemente a ${email}?`)) {
+          await deleteDoc(doc(db, "autorizados", email));
+        }
+      };
+
+      // ESCUCHA EN TIEMPO REAL
+      onSnapshot(
+        query(collection(db, "autorizados"), orderBy("nombreCompleto", "asc")),
+        (snap) => {
+          const contenedor = document.getElementById("lista-profesores");
+          const counter = document.getElementById("counter");
+
+          if (counter) {
+            counter.innerText = snap.size;
+          }
+
+          contenedor.innerHTML = "";
+
+          if (snap.empty) {
+            contenedor.innerHTML =
+              '<p class="p-10 text-center text-slate-500 text-xs italic uppercase tracking-widest">No hay profesores registrados</p>';
+            return;
+          }
+
+          snap.forEach((d) => {
+            const prof = d.data();
+            const item = document.createElement("div");
+            item.className =
+              "flex items-center justify-between p-5 hover:bg-slate-700/20 transition-all";
+
+            item.innerHTML = `
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-slate-200">
+              ${prof.nombreCompleto || prof.nombre + " " + prof.apellido || prof.email}
+            </span>
+            <span class="text-[10px] text-slate-400">
+              ${prof.email}
+            </span>
+            <span class="text-[9px] font-black uppercase ${prof.activo ? "text-green-500" : "text-red-500"}">
+              ${prof.activo ? "● Activo" : "○ Desactivado"}
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="toggleEstado('${prof.email}', ${prof.activo})" 
+              class="text-[10px] font-black px-3 py-1 rounded-lg border border-slate-600 hover:bg-white hover:text-slate-900 transition-all uppercase tracking-tighter">
+              ${prof.activo ? "Desactivar" : "Activar"}
+            </button>
+            <button onclick="eliminarProfesor('${prof.email}')" 
+              class="text-[10px] font-black text-slate-600 hover:text-red-500 transition-all uppercase px-2">
+              ×
+            </button>
+          </div>
+        `;
+            contenedor.appendChild(item);
+          });
+        },
+      );
+    </script>
+  </body>
+</html>
